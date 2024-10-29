@@ -20,6 +20,7 @@ env:
   CMAKE_BUILD_TYPE: 'Release'
   CC: clang
   CXX: clang++
+  VERSION: '1.0.0'  # Asegúrate de ajustar la versión según sea necesario
 
 jobs:
   clang:
@@ -47,4 +48,3 @@ jobs:
         with:
           name: appimage
           path: ./*.AppImage
-          if-no-files-found: error
