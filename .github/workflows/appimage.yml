@@ -39,7 +39,7 @@ jobs:
         run: |
           appimage-builder --recipe misc/AppImageBuilder.yml
 
-      - name: prepare_discord_upload
+      - name: Prepare Discord Upload
         run: |
           mv ./*.AppImage luanti.AppImage
       
