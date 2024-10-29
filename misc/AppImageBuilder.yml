@@ -47,13 +47,12 @@ AppImage:
   update-information: guess
   sign-key: None
   arch: x86_64
-  comp:
-    type: cmake
-    build:
-      - "cmake -B appimage-build -DENABLE_REDIS=FALSE -DENABLE_POSTGRESQL=OFF -DCMAKE_INSTALL_PREFIX=AppDir/usr/ -DBUILD_SERVER=FALSE -DENABLE_GETTEXT=TRUE -DCMAKE_BUILD_TYPE=Release -DRUN_IN_PLACE=FALSE"
-      - "cmake --build appimage-build --parallel $(nproc) --config Release"
-    install:
-      - "cmake --install appimage-build"
+  comp: cmake  # Cambiar a un string simple
+  build: |
+    cmake -B appimage-build -DENABLE_REDIS=FALSE -DENABLE_POSTGRESQL=OFF -DCMAKE_INSTALL_PREFIX=AppDir/usr/ -DBUILD_SERVER=FALSE -DENABLE_GETTEXT=TRUE -DCMAKE_BUILD_TYPE=Release -DRUN_IN_PLACE=FALSE && \
+    cmake --build appimage-build --parallel $(nproc) --config Release
+  install: |
+    cmake --install appimage-build
 
 script: |
     # Is a backup icon location in case
