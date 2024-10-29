@@ -1,7 +1,9 @@
-name: appimage
+name: Build AppImage
 
 on:
   push:
+    branches:
+      - master  # Cambia esto a la rama que prefieras
     paths:
       - 'lib/**.[ch]'
       - 'lib/**.cpp'
@@ -18,23 +20,42 @@ on:
 
 env:
   CMAKE_BUILD_TYPE: 'Release'
-  CC: clang
-  CXX: clang++
+  VERSION: '1.0.0'  # Define la versión aquí
 
 jobs:
-  clang:
+  build:
     runs-on: ubuntu-22.04
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Install deps
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
         run: |
-          source ./util/ci/common.sh
-          install_linux_deps clang gdb ninja-build python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse sshpass
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            clang \
+            gdb \
+            ninja-build \
+            python3-pip \
+            python3-setuptools \
+            patchelf \
+            desktop-file-utils \
+            libgdk-pixbuf2.0-dev \
+            fakeroot \
+            strace \
+            fuse \
+            sshpass
+
+          # Instalar AppImage Tool
           sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
           sudo chmod +x /usr/local/bin/appimagetool
+
+          # Instalar AppImage Builder
           sudo pip3 install git+https://github.com/AppImageCrafters/appimage-builder.git
 
-      - name: Compile AppImage
+      - name: Build AppImage
         run: |
           appimage-builder --recipe misc/AppImageBuilder.yml
 
@@ -42,9 +63,9 @@ jobs:
         run: |
           mv ./*.AppImage luanti.AppImage
       
-      - uses: actions/upload-artifact@v4
-        id: artifact-upload-step
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v4
         with:
-          name: appimage
-          path: ./*.AppImage
+          name: luanti-appimage
+          path: luanti.AppImage
           if-no-files-found: error

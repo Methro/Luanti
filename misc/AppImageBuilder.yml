@@ -18,20 +18,21 @@ AppDir:
   apt:
     arch: amd64
     sources:
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy main universe
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-updates main universe
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-backports main universe
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-security main universe
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ focal main universe
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ focal-updates main universe
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ focal-backports main universe
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ focal-security main universe
 
     include:
       - libc6
       - libcrypt1
+      - libcurl3-gnutls
       - libcurl4
       - libfreetype6
       - libgl1
       - libjpeg-turbo8
-      - libjsoncpp25
+      - libjsoncpp1
       - libleveldb1d
       - libluajit-5.1-2
       - libopenal1
@@ -46,7 +47,6 @@ AppImage:
   update-information: guess
   sign-key: None
   arch: x86_64
-  comp: gzip
 script: |
     # Compile and install binaries into AppDir
     cmake -B appimage-build -DENABLE_REDIS=FALSE -DENABLE_POSTGRESQL=OFF -DCMAKE_INSTALL_PREFIX=AppDir/usr/ -DBUILD_SERVER=FALSE -DENABLE_GETTEXT=TRUE -DCMAKE_BUILD_TYPE=Release -DRUN_IN_PLACE=FALSE
@@ -54,7 +54,7 @@ script: |
     cmake --install appimage-build
 
     # Is a backup icon location in case
-    mkdir -p AppDir/usr/share/minetest/misc
-    cp AppDir/usr/share/icons/hicolor/128x128/apps/minetest.png AppDir/usr/share/minetest/misc/minetest-xorg-icon-128.png
+    mkdir -p AppDir/usr/share/luanti/misc
+    cp AppDir/usr/share/icons/hicolor/128x128/apps/luanti.png AppDir/usr/share/luanti/misc/luanti-xorg-icon-128.png
     # Validation issues
     sed -i '/PrefersNonDefaultGPU/d' AppDir/usr/share/applications/net.minetest.minetest.desktop
