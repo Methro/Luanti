@@ -20,7 +20,6 @@ env:
   CMAKE_BUILD_TYPE: 'Release'
   CC: clang
   CXX: clang++
-  VERSION: '1.0.0'  # Asegúrate de ajustar la versión según sea necesario
 
 jobs:
   clang:
@@ -39,12 +38,13 @@ jobs:
         run: |
           appimage-builder --recipe misc/AppImageBuilder.yml
 
-      - name: Prepare Discord Upload
+      - name: Prepare Upload
         run: |
-          mv ./*.AppImage luanti.AppImage
+          mv ./*.AppImage mootest.AppImage
       
       - uses: actions/upload-artifact@v4
         id: artifact-upload-step
         with:
           name: appimage
           path: ./*.AppImage
+          if-no-files-found: error
