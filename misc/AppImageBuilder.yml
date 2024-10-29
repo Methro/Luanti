@@ -4,10 +4,10 @@ AppDir:
   path: AppDir
   app_info:
     id: net.minetest.minetest
-    name: Mootest
-    icon: minetest
-    version: 5.10-dev
-    exec: usr/bin/minetest
+    name: Luanti
+    icon: luanti
+    version: !ENV ${VERSION}
+    exec: usr/bin/luanti
     exec_args: $@
   files:
     include: []
