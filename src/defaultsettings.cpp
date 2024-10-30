@@ -302,6 +302,7 @@ void set_default_settings()
 	settings->setDefault("enable_shaders", "true");
 	settings->setDefault("enable_particles", "true");
 	settings->setDefault("arm_inertia", "true");
+	settings->setDefault("enable_left_hand", "false");
 	settings->setDefault("show_nametag_backgrounds", "true");
 	settings->setDefault("show_block_bounds_radius_near", "4");
 	settings->setDefault("transparency_sorting_distance", "16");
@@ -360,6 +361,7 @@ void set_default_settings()
 	settings->setDefault("random_input", "false");
 	settings->setDefault("aux1_descends", "false");
 	settings->setDefault("doubletap_jump", "false");
+	settings->setDefault("fullbright", "true");
 	settings->setDefault("always_fly_fast", "true");
 	settings->setDefault("autojump", bool_to_cstr(has_touch));
 	settings->setDefault("continuous_forward", "false");
