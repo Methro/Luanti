@@ -4373,15 +4373,14 @@ void Game::drawScene(ProfilerGraph *graph, RunStats *stats)
 		graph->draw(10, screensize.Y - 10, driver, g_fontengine->getFont());
 
 	/*
-		Damage flash disabled (just to make sure)
-	
-	if (this->runData.damage_flash > 0.0f) {
-		video::SColor color(this->runData.damage_flash, 180, 0, 0);
-		this->driver->draw2DRectangle(color,
-					core::rect<s32>(0, 0, screensize.X, screensize.Y),
-					NULL);
-	}
-	*/
+    Damage flash disabled (just to make sure)
+    if (this->runData.damage_flash > 0.0f) {
+        video::SColor color(this->runData.damage_flash, 180, 0, 0);
+        this->driver->draw2DRectangle(color,
+                    core::rect<s32>(0, 0, screensize.X, screensize.Y),
+                    NULL);
+    }
+
 	this->driver->endScene();
 
 	stats->drawtime = tt_draw.stop(true);

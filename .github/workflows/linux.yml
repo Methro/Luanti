@@ -58,8 +58,7 @@ jobs:
           mkdir -p artifacts
           cp -r ./bin/luanti artifacts/
           cd artifacts
-          zip -r client.zip luanti
-          
+
       - name: Upload Client artifacts
         uses: actions/upload-artifact@v3
         with:
