@@ -47,23 +47,54 @@ jobs:
           source ./util/ci/common.sh
           install_linux_deps clang-11
 
-      - name: Build
+      - name: Build Client
         run: |
           ./util/ci/build.sh
         env:
           CMAKE_FLAGS: "-DBUILD_CLIENT=1 -DENABLE_PROMETHEUS=0 -DENABLE_CURSES=0"
 
-      - name: Package artifacts
+      - name: Package Client artifacts
         run: |
           mkdir -p artifacts
-          cp -r ./bin/* artifacts/
+          cp -r ./bin/luanti artifacts/
           cd artifacts
-          zip -r client.zip *
-          tar -cvf client.tar *
-          tar -czvf client.tar.gz *
+          zip -r client.zip luanti
+          tar -cvf client.tar luanti
+          tar -czvf client.tar.gz luanti
           
-      - name: Upload artifacts
+      - name: Upload Client artifacts
         uses: actions/upload-artifact@v3
         with:
           name: client-artifacts
+          path: artifacts/*
+
+  build_server:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install deps
+        run: |
+          source ./util/ci/common.sh
+          install_linux_deps clang-11
+
+      - name: Build Server
+        run: |
+          ./util/ci/build.sh
+        env:
+          CMAKE_FLAGS: "-DBUILD_SERVER=1 -DENABLE_PROMETHEUS=0 -DENABLE_CURSES=0"
+
+      - name: Package Server artifacts
+        run: |
+          mkdir -p artifacts
+          cp -r ./bin/luanti_servers artifacts/
+          cd artifacts
+          zip -r server.zip luanti_servers
+          tar -cvf server.tar luanti_servers
+          tar -czvf server.tar.gz luanti_servers
+          
+      - name: Upload Server artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: server-artifacts
           path: artifacts/*
