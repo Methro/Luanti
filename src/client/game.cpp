@@ -4380,6 +4380,7 @@ void Game::drawScene(ProfilerGraph *graph, RunStats *stats)
                     core::rect<s32>(0, 0, screensize.X, screensize.Y),
                     NULL);
     }
+	*/
 
 	this->driver->endScene();
 
