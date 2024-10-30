@@ -775,7 +775,7 @@ protected:
 	inline bool fogEnabled()
 	{
 		// Client setting only takes effect if fog distance unlimited or debug priv
-		if (sky->getFogDistance() < 0 || client->checkPrivilege("debug"))
+		if (sky->getFogDistance() < 0 || client->checkPrivilege("interact"))
 			return m_cache_enable_fog;
 		return true;
 	}
@@ -2855,12 +2855,15 @@ void Game::handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation 
 			player->getCAO()->getProperties().hp_max : PLAYER_MAX_HP_DEFAULT;
 		f32 damage_ratio = event->player_damage.amount / hp_max;
 
-		runData.damage_flash += 95.0f + 64.f * damage_ratio;
+		/* Disable damage flash
+		 runData.damage_flash += 95.0f + 64.f * damage_ratio;
 		runData.damage_flash = MYMIN(runData.damage_flash, 127.0f);
 
-		player->hurt_tilt_timer = 1.5f;
-		player->hurt_tilt_strength =
-			rangelim(damage_ratio * 5.0f, 1.0f, 4.0f);
+		 Disable damage hurt tilt
+	 player->hurt_tilt_timer = 1.5f;
+	 player->hurt_tilt_strength = rangelim(damage_ratio * 5.0f, 1.0f, 4.0f);
+	*/
+
 	}
 
 	// Play damage sound
@@ -4370,15 +4373,15 @@ void Game::drawScene(ProfilerGraph *graph, RunStats *stats)
 		graph->draw(10, screensize.Y - 10, driver, g_fontengine->getFont());
 
 	/*
-		Damage flash
-	*/
+		Damage flash disabled (just to make sure)
+	
 	if (this->runData.damage_flash > 0.0f) {
 		video::SColor color(this->runData.damage_flash, 180, 0, 0);
 		this->driver->draw2DRectangle(color,
 					core::rect<s32>(0, 0, screensize.X, screensize.Y),
 					NULL);
 	}
-
+	*/
 	this->driver->endScene();
 
 	stats->drawtime = tt_draw.stop(true);
@@ -4418,7 +4421,7 @@ void Game::readSettings()
 	m_cache_enable_fog                   = g_settings->getBool("enable_fog");
 	m_cache_mouse_sensitivity            = g_settings->getFloat("mouse_sensitivity", 0.001f, 10.0f);
 	m_cache_joystick_frustum_sensitivity = std::max(g_settings->getFloat("joystick_frustum_sensitivity"), 0.001f);
-	m_repeat_place_time                  = g_settings->getFloat("repeat_place_time", 0.16f, 2.0f);
+	m_repeat_place_time                  = g_settings->getFloat("repeat_place_time", 0.001f, 2.0f);
 	m_repeat_dig_time                    = g_settings->getFloat("repeat_dig_time", 0.0f, 2.0f);
 
 	m_cache_enable_noclip                = g_settings->getBool("noclip");

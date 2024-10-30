@@ -59,8 +59,6 @@ jobs:
           cp -r ./bin/luanti artifacts/
           cd artifacts
           zip -r client.zip luanti
-          tar -cvf client.tar luanti
-          tar -czvf client.tar.gz luanti
           
       - name: Upload Client artifacts
         uses: actions/upload-artifact@v3
@@ -87,11 +85,9 @@ jobs:
       - name: Package Server artifacts
         run: |
           mkdir -p artifacts
-          cp -r ./bin/luanti_servers artifacts/
+          cp -r ./bin/luantiserver artifacts/
           cd artifacts
-          zip -r server.zip luanti_servers
-          tar -cvf server.tar luanti_servers
-          tar -czvf server.tar.gz luanti_servers
+          
           
       - name: Upload Server artifacts
         uses: actions/upload-artifact@v3
