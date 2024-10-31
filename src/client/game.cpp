@@ -2585,8 +2585,8 @@ void Game::decreaseViewRange()
 	s16 range_new = range - 10;
 	s16 server_limit = sky->getFogDistance();
 
-	if (range_new <= 20) {
-		range_new = 20;
+	if (range_new <= 0) {
+		range_new = 0;
 		std::wstring msg = server_limit >= 0 && range_new > server_limit ?
 				fwgettext("Viewing changed to %d (the minimum), but limited to %d by game or mod", range_new, server_limit) :
 				fwgettext("Viewing changed to %d (the minimum)", range_new);
