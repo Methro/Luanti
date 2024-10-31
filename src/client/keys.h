@@ -19,6 +19,7 @@ public:
 		JUMP,
 		AUX1,
 		SNEAK,
+		TOGGLE_SNEAK,
 		AUTOFORWARD,
 		DIG,
 		PLACE,

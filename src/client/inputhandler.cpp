@@ -26,6 +26,7 @@ void KeyCache::populate()
 	key[KeyType::JUMP] = getKeySetting("keymap_jump");
 	key[KeyType::AUX1] = getKeySetting("keymap_aux1");
 	key[KeyType::SNEAK] = getKeySetting("keymap_sneak");
+	key[KeyType::TOGGLE_SNEAK] = getKeySetting("keymap_toggle_sneak");
 	key[KeyType::DIG] = getKeySetting("keymap_dig");
 	key[KeyType::PLACE] = getKeySetting("keymap_place");
 

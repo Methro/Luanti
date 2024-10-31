@@ -717,6 +717,7 @@ protected:
 	void toggleCinematic();
 	void toggleBlockBounds();
 	void toggleAutoforward();
+	void toggleSneak();
 
 	void toggleMinimap(bool shift_pressed);
 	void toggleFog();
@@ -2060,6 +2061,8 @@ void Game::processKeyInput()
 	} else if (wasKeyDown(KeyType::BACKWARD)) {
 		if (g_settings->getBool("continuous_forward"))
 			toggleAutoforward();
+	} else if (wasKeyDown(KeyType::TOGGLE_SNEAK)) {
+		toggleSneak();
 	} else if (wasKeyDown(KeyType::INVENTORY)) {
 		openInventory();
 	} else if (input->cancelPressed()) {
@@ -2439,6 +2442,17 @@ void Game::toggleAutoforward()
 		m_game_ui->showTranslatedStatusText("Automatic forward disabled");
 }
 
+void Game::toggleSneak()
+{
+	bool toggle_sneak = !g_settings->getBool("toggle_sneak");
+	g_settings->set("sneak_lock", bool_to_cstr(toggle_sneak));
+
+	if (toggle_sneak)
+		m_game_ui->showTranslatedStatusText("Sneak toggled");
+	else
+		m_game_ui->showTranslatedStatusText("Sneak untoggled");
+}
+
 void Game::toggleMinimap(bool shift_pressed)
 {
 	if (!mapper || !m_game_ui->m_flags.show_hud || !g_settings->getBool("enable_minimap"))
@@ -2717,6 +2731,11 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		input->getJoystickSpeed(),
 		input->getJoystickDirection()
 	);
+
+	// Enable Toggle sneak
+	if (g_settings->getBool("toggle_sneak")) {
+		control.sneak = true;
+	}
 	control.setMovementFromKeys();
 
 	// autoforward if set: move at maximum speed
@@ -3644,7 +3663,7 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 
 	// formspec in meta
 	if (meta && !meta->getString("formspec").empty() && !input->isRandom()
-			&& !isKeyDown(KeyType::SNEAK)) {
+			&& !(isKeyDown(KeyType::SNEAK) || isKeyDown(KeyType::TOGGLE_SNEAK))) {
 		// on_rightclick callbacks are called anyway
 		if (nodedef_manager->get(map.getNode(nodepos)).rightclickable)
 			client->interact(INTERACT_PLACE, pointed);
@@ -3669,7 +3688,7 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 
 	// on_rightclick callback
 	if (prediction.empty() || (nodedef->get(node).rightclickable &&
-			!isKeyDown(KeyType::SNEAK))) {
+			!(isKeyDown(KeyType::SNEAK) || isKeyDown(KeyType::TOGGLE_SNEAK)))) {
 		// Report to server
 		client->interact(INTERACT_PLACE, pointed);
 		return false;
