@@ -1,5 +1,6 @@
 name: windows
 
+# build on c/cpp changes or workflow changes
 on:
   push:
     paths:
@@ -7,35 +8,59 @@ on:
       - 'lib/**.cpp'
       - 'src/**.[ch]'
       - 'src/**.cpp'
+      - 'irr/**.[ch]'
+      - 'irr/**.cpp'
       - '**/CMakeLists.txt'
       - 'cmake/Modules/**'
       - 'util/buildbot/**'
-      - 'util/ci/**'
+      - 'misc/*.manifest'
       - '.github/workflows/windows.yml'
-      - 'Dockerfile'
-      - '.dockerignore'
+  pull_request:
+    paths:
+      - 'lib/**.[ch]'
+      - 'lib/**.cpp'
+      - 'src/**.[ch]'
+      - 'src/**.cpp'
+      - 'irr/**.[ch]'
+      - 'irr/**.cpp'
+      - '**/CMakeLists.txt'
+      - 'cmake/Modules/**'
+      - 'util/buildbot/**'
+      - 'misc/*.manifest'
+      - '.github/workflows/windows.yml'
+
 jobs:
-  mingw64:
-    name: "MinGW cross-compiler (64-bit)"
+  mingw:
+    name: "MinGW cross-compiler (${{ matrix.bits }}-bit)"
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        bits: [32, 64]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install compiler
         run: |
-          sudo apt-get update && sudo apt-get install -y gettext
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gettext wine wine${{ matrix.bits }}
           sudo ./util/buildbot/download_toolchain.sh /usr
-
 
       - name: Build
         run: |
-          EXISTING_MINETEST_DIR=$PWD ./util/buildbot/buildwin64.sh B
+           EXISTING_MINETEST_DIR=$PWD \
+           ./util/buildbot/buildwin${{ matrix.bits }}.sh B
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: mingw64
-          path: ./B/build/*.zip
-          if-no-files-found: error
-
-      - name: Upload
+      # Check that the resulting binary can run (DLLs etc.)
+      - name: Runtime test
         run: |
-          mv ./B/build/*.zip luanti.zip
+          dest=$(mktemp -d)
+          unzip -q -d "$dest" B/build/*.zip
+          cd "$dest"/luanti-*-win*
+          wine bin/luanti.exe --version
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "mingw${{ matrix.bits }}"
+          path: B/build/*.zip
+          if-no-files-found: error
