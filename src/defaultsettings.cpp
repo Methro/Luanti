@@ -120,7 +120,7 @@ void set_default_settings()
 	settings->setDefault("curl_file_download_timeout", "300000");
 	settings->setDefault("curl_verify_cert", "true");
 	settings->setDefault("enable_remote_media_server", "true");
-	settings->setDefault("enable_client_modding", "false");
+	settings->setDefault("enable_client_modding", "true");
 	settings->setDefault("max_out_chat_queue_size", "20");
 	settings->setDefault("pause_on_lost_focus", "false");
 	settings->setDefault("enable_split_login_register", "true");
@@ -137,7 +137,6 @@ void set_default_settings()
 	settings->setDefault("keymap_right", "KEY_KEY_D");
 	settings->setDefault("keymap_jump", "KEY_SPACE");
 	settings->setDefault("keymap_sneak", "KEY_LSHIFT");
-	settings->setDefault("keymap_toggle_sneak", "");
 	settings->setDefault("keymap_dig", "KEY_LBUTTON");
 	settings->setDefault("keymap_place", "KEY_RBUTTON");
 	settings->setDefault("keymap_drop", "KEY_KEY_Q");
@@ -233,21 +232,20 @@ void set_default_settings()
 	settings->setDefault("show_debug", "true");
 	settings->setDefault("opengl_debug", "true");
 #endif
-	settings->setDefault("toggle_sneak", "false");
 	settings->setDefault("fsaa", "2");
 	settings->setDefault("undersampling", "1");
 	settings->setDefault("world_aligned_mode", "enable");
 	settings->setDefault("autoscale_mode", "disable");
 	settings->setDefault("texture_min_size", "64");
-	settings->setDefault("enable_fog", "true");
+	settings->setDefault("enable_fog", "false");
 	settings->setDefault("fog_start", "0.4");
 	settings->setDefault("3d_mode", "none");
 	settings->setDefault("3d_paralax_strength", "0.025");
 	settings->setDefault("tooltip_show_delay", "400");
 	settings->setDefault("tooltip_append_itemname", "false");
 	settings->setDefault("fps_max", "60");
-	settings->setDefault("fps_max_unfocused", "20");
-	settings->setDefault("viewing_range", "190");
+	settings->setDefault("fps_max_unfocused", "5");
+	settings->setDefault("viewing_range", "20");
 	settings->setDefault("client_mesh_chunk", "1");
 	settings->setDefault("screen_w", "1024");
 	settings->setDefault("screen_h", "600");
@@ -255,11 +253,11 @@ void set_default_settings()
 	settings->setDefault("autosave_screensize", "true");
 	settings->setDefault("fullscreen", bool_to_cstr(has_touch));
 	settings->setDefault("vsync", "false");
-	settings->setDefault("fov", "72");
-	settings->setDefault("leaves_style", "fancy");
+	settings->setDefault("fov", "90");
+	settings->setDefault("leaves_style", "simple");
 	settings->setDefault("connected_glass", "false");
 	settings->setDefault("smooth_lighting", "true");
-	settings->setDefault("performance_tradeoffs", "false");
+	settings->setDefault("performance_tradeoffs", "true");
 	settings->setDefault("lighting_alpha", "0.0");
 	settings->setDefault("lighting_beta", "1.5");
 	settings->setDefault("display_gamma", "1.0");
@@ -270,15 +268,15 @@ void set_default_settings()
 	settings->setDefault("shader_path", "");
 	settings->setDefault("video_driver", "");
 	settings->setDefault("cinematic", "false");
-	settings->setDefault("camera_smoothing", "0.0");
+	settings->setDefault("camera_smoothing", "0.36");
 	settings->setDefault("cinematic_camera_smoothing", "0.7");
-	settings->setDefault("enable_clouds", "true");
-	settings->setDefault("view_bobbing_amount", "1.0");
-	settings->setDefault("fall_bobbing_amount", "0.03");
-	settings->setDefault("enable_3d_clouds", "true");
+	settings->setDefault("enable_clouds", "false");
+	settings->setDefault("view_bobbing_amount", "0");
+	settings->setDefault("fall_bobbing_amount", "0");
+	settings->setDefault("enable_3d_clouds", "false");
 	settings->setDefault("soft_clouds", "false");
-	settings->setDefault("cloud_radius", "12");
-	settings->setDefault("menu_clouds", "true");
+	settings->setDefault("cloud_radius", "0");
+	settings->setDefault("menu_clouds", "false");
 	settings->setDefault("translucent_liquids", "true");
 	settings->setDefault("console_height", "0.6");
 	settings->setDefault("console_color", "(0,0,0)");
@@ -290,9 +288,9 @@ void set_default_settings()
 	settings->setDefault("node_highlighting", "box");
 	settings->setDefault("crosshair_color", "(255,255,255)");
 	settings->setDefault("crosshair_alpha", "255");
-	settings->setDefault("recent_chat_messages", "6");
-	settings->setDefault("hud_scaling", "1.0");
-	settings->setDefault("gui_scaling", "1.0");
+	settings->setDefault("recent_chat_messages", "2");
+	settings->setDefault("hud_scaling", "0.8");
+	settings->setDefault("gui_scaling", "0.7");
 	settings->setDefault("gui_scaling_filter", "false");
 	settings->setDefault("gui_scaling_filter_txr2img", "true");
 	settings->setDefault("smooth_scrolling", "true");
@@ -301,21 +299,21 @@ void set_default_settings()
 	settings->setDefault("enable_local_map_saving", "false");
 	settings->setDefault("show_entity_selectionbox", "false");
 	settings->setDefault("ambient_occlusion_gamma", "1.8");
-	settings->setDefault("enable_shaders", "true");
-	settings->setDefault("enable_particles", "true");
-	settings->setDefault("arm_inertia", "true");
+	settings->setDefault("enable_shaders", "false");
+	settings->setDefault("enable_particles", "false");
+	settings->setDefault("arm_inertia", "false");
 	settings->setDefault("enable_left_hand", "false");
 	settings->setDefault("show_nametag_backgrounds", "true");
 	settings->setDefault("show_block_bounds_radius_near", "4");
 	settings->setDefault("transparency_sorting_distance", "16");
 
-	settings->setDefault("enable_minimap", "true");
+	settings->setDefault("enable_minimap", "false");
 	settings->setDefault("minimap_shape_round", "true");
 	settings->setDefault("minimap_double_scan_height", "true");
 
 	// Effects
 	settings->setDefault("enable_post_processing", "true");
-	settings->setDefault("directional_colored_fog", "true");
+	settings->setDefault("directional_colored_fog", "false");
 	settings->setDefault("inventory_items_animations", "false");
 	settings->setDefault("mip_map", "false");
 	settings->setDefault("bilinear_filter", "false");
@@ -357,7 +355,7 @@ void set_default_settings()
 	settings->setDefault("enable_hotbar_mouse_wheel", "true");
 	settings->setDefault("invert_hotbar_mouse_wheel", "false");
 	settings->setDefault("mouse_sensitivity", "0.2");
-	settings->setDefault("repeat_place_time", "0.25");
+	settings->setDefault("repeat_place_time", "0.16");
 	settings->setDefault("repeat_dig_time", "0.0");
 	settings->setDefault("safe_dig_and_place", "false");
 	settings->setDefault("random_input", "false");
