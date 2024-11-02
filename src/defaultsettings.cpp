@@ -284,8 +284,8 @@ void set_default_settings()
 	settings->setDefault("formspec_fullscreen_bg_color", "(0,0,0)");
 	settings->setDefault("formspec_fullscreen_bg_opacity", "140");
 	settings->setDefault("selectionbox_color", "(0,0,0)");
-	settings->setDefault("selectionbox_width", "2");
-	settings->setDefault("node_highlighting", "box");
+	settings->setDefault("selectionbox_width", "1");
+	settings->setDefault("node_highlighting", "halo");
 	settings->setDefault("crosshair_color", "(255,255,255)");
 	settings->setDefault("crosshair_alpha", "255");
 	settings->setDefault("recent_chat_messages", "2");
@@ -354,7 +354,7 @@ void set_default_settings()
 	settings->setDefault("invert_mouse", "false");
 	settings->setDefault("enable_hotbar_mouse_wheel", "true");
 	settings->setDefault("invert_hotbar_mouse_wheel", "false");
-	settings->setDefault("mouse_sensitivity", "0.2");
+	settings->setDefault("mouse_sensitivity", "0.0143");
 	settings->setDefault("repeat_place_time", "0.16");
 	settings->setDefault("repeat_dig_time", "0.0");
 	settings->setDefault("safe_dig_and_place", "false");
