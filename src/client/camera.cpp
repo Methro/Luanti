@@ -577,7 +577,7 @@ const bool flying = g_settings->getBool("free_move") && m_client->checkLocalPriv
 // Disable it if true
 if (!disable_view_bobbing && (walking || swimming || climbing || falling || flying)) {
     // Then do not initialize arm bobbing animation 
-    m_view_bobbing_state = 0;  
+    m_view_bobbing_state = 0; 
 } else if (m_view_bobbing_state == 1) {
     // Making sure is fully disabled as long as it's set
     m_view_bobbing_state = 0;
