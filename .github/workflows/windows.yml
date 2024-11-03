@@ -1,6 +1,5 @@
 name: windows
 
-# build on c/cpp changes or workflow changes
 on:
   push:
     paths:
@@ -31,27 +30,21 @@ on:
 
 jobs:
   mingw:
-    name: "MinGW cross-compiler (${{ matrix.bits }}-bit)"
+    name: "MinGW cross-compiler (64-bit)"
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        bits: [32, 64]
     steps:
       - uses: actions/checkout@v4
       - name: Install compiler
         run: |
-          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends gettext wine wine${{ matrix.bits }}
+          sudo apt-get install -y --no-install-recommends gettext wine wine64
           sudo ./util/buildbot/download_toolchain.sh /usr
 
       - name: Build
         run: |
            EXISTING_MINETEST_DIR=$PWD \
-           ./util/buildbot/buildwin${{ matrix.bits }}.sh B
+           ./util/buildbot/buildwin64.sh B
 
-      # Check that the resulting binary can run (DLLs etc.)
       - name: Runtime test
         run: |
           dest=$(mktemp -d)
@@ -61,35 +54,26 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: "mingw${{ matrix.bits }}"
+          name: "mingw64"
           path: B/build/*.zip
           if-no-files-found: error
 
   msvc:
-    name: VS 2019 ${{ matrix.config.arch }}-${{ matrix.type }}
+    name: VS 2019 x64-portable
     runs-on: windows-2019
     env:
       VCPKG_VERSION: 01f602195983451bc83e72f4214af2cbc495aa94
-      # 2024.05.24
       vcpkg_packages: zlib zstd curl[winssl] openal-soft libvorbis libogg libjpeg-turbo sqlite3 freetype luajit gmp jsoncpp opengl-registry
     strategy:
       fail-fast: false
       matrix:
         config:
           - {
-              arch: x86,
-              generator: "-G'Visual Studio 16 2019' -A Win32",
-              vcpkg_triplet: x86-windows
-            }
-          - {
               arch: x64,
               generator: "-G'Visual Studio 16 2019' -A x64",
               vcpkg_triplet: x64-windows
             }
         type: [portable]
-#        type: [portable, installer]
-# The installer type is working, but disabled, to save runner jobs.
-# Enable it, when working on the installer.
 
     steps:
       - uses: actions/checkout@v4
@@ -117,11 +101,10 @@ jobs:
         run: cmake --build . --config Release
 
       - name: Unittests
-        # need this workaround for stdout to work
         run: |
           $proc = start .\bin\Release\luanti.exe --run-unittests -NoNewWindow -Wait -PassThru
           exit $proc.ExitCode
-        continue-on-error: true # FIXME!!
+        continue-on-error: true
 
       - name: CPack
         run: |
@@ -135,10 +118,9 @@ jobs:
           }
           rm -r $env:GITHUB_WORKSPACE\Package\_CPack_Packages
         env:
-          TYPE: ${{matrix.type}}
+          TYPE: ${{matrix.type }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: msvc-${{ matrix.config.arch }}-${{ matrix.type }}
+          name: msvc-x64-portable
           path: .\Package\
-          if-no-files-found: error

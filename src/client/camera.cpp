@@ -559,27 +559,31 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	// Set render distance
 	updateViewingRange();
 
-	// If the player is walking, swimming, or climbing,
-	// view bobbing is enabled and free_move is off,
-	// start (or continue) the view bobbing animation.
-	const v3f &speed = player->getSpeed();
-	const bool movement_XZ = std::hypot(speed.X, speed.Z) > BS;
-	const bool movement_Y = std::abs(speed.Y) > BS;
+	// Bool to disable/enable view_bobbing 
+const bool disable_view_bobbing = g_settings->getBool("disable_view_bobbing");
 
-	const bool walking = movement_XZ && player->touching_ground;
-	const bool swimming = (movement_XZ || player->swimming_vertical) && player->in_liquid;
-	const bool climbing = movement_Y && player->is_climbing;
-	const bool flying = g_settings->getBool("free_move")
-		&& m_client->checkLocalPrivilege("fly");
-	if ((walking || swimming || climbing) && !flying) {
-		// Start animation
-		m_view_bobbing_state = 1;
-		m_view_bobbing_speed = MYMIN(speed.getLength(), 70);
-	} else if (m_view_bobbing_state == 1) {
-		// Stop animation
-		m_view_bobbing_state = 2;
-		m_view_bobbing_speed = 60;
-	}
+// If the player is walking, swimming, climbing, falling, or flying,
+// view bobbing is disabled (so the arm doesn't move).
+const v3f &speed = player->getSpeed();
+const bool movement_XZ = std::hypot(speed.X, speed.Z) > BS;
+const bool movement_Y = std::abs(speed.Y) > BS;
+
+const bool walking = movement_XZ && player->touching_ground;
+const bool swimming = (movement_XZ || player->swimming_vertical) && player->in_liquid;
+const bool climbing = movement_Y && player->is_climbing;
+const bool falling = speed.Y < -BS;  // Consider falling if speed in Y is negative and below a threshold
+const bool flying = g_settings->getBool("free_move") && m_client->checkLocalPrivilege("fly");
+
+// Disable it if true
+if (!disable_view_bobbing && (walking || swimming || climbing || falling || flying)) {
+    // Then do not initialize arm bobbing animation 
+    m_view_bobbing_state = 0;  
+} else if (m_view_bobbing_state == 1) {
+    // Making sure is fully disabled as long as it's set
+    m_view_bobbing_state = 0;
+    m_view_bobbing_speed = 0;
+}
+
 }
 
 void Camera::updateViewingRange()

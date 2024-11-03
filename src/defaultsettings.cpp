@@ -273,6 +273,7 @@ void set_default_settings()
 	settings->setDefault("enable_clouds", "false");
 	settings->setDefault("view_bobbing_amount", "0");
 	settings->setDefault("fall_bobbing_amount", "0");
+	settings->setDefault("disable_view_bobbing", "false");
 	settings->setDefault("enable_3d_clouds", "false");
 	settings->setDefault("soft_clouds", "false");
 	settings->setDefault("cloud_radius", "0");
