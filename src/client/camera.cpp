@@ -559,7 +559,7 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	// Set render distance
 	updateViewingRange();
 
-	// Bool to disable/enable view_bobbing 
+// Bool to disable/enable view_bobbing 
 const bool disable_view_bobbing = g_settings->getBool("disable_view_bobbing");
 
 // If the player is walking, swimming, climbing, falling, or flying,
@@ -571,17 +571,17 @@ const bool movement_Y = std::abs(speed.Y) > BS;
 const bool walking = movement_XZ && player->touching_ground;
 const bool swimming = (movement_XZ || player->swimming_vertical) && player->in_liquid;
 const bool climbing = movement_Y && player->is_climbing;
-const bool falling = speed.Y < -BS;  // Consider falling if speed in Y is negative and below a threshold
+const bool falling = speed.Y < -BS;
 const bool flying = g_settings->getBool("free_move") && m_client->checkLocalPrivilege("fly");
 
 // Disable it if true
 if (!disable_view_bobbing && (walking || swimming || climbing || falling || flying)) {
-    // Then do not initialize arm bobbing animation 
-    m_view_bobbing_state = 0; 
+// Then do not initialize arm bobbing animation 
+m_view_bobbing_state = 0; 
 } else if (m_view_bobbing_state == 1) {
-    // Making sure is fully disabled as long as it's set
-    m_view_bobbing_state = 0;
-    m_view_bobbing_speed = 0;
+// Making sure is fully disabled as long as it's set
+	m_view_bobbing_state = 0;
+	m_view_bobbing_speed = 0;
 }
 
 }
