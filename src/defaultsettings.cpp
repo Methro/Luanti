@@ -127,7 +127,7 @@ void set_default_settings()
 	settings->setDefault("enable_split_login_register", "true");
 	settings->setDefault("occlusion_culler", "bfs");
 	settings->setDefault("enable_raytraced_culling", "true");
-	settings->setDefault("chat_weblink_color", "#8888FF");
+	settings->setDefault("chat_weblink_color", "#F9F49E");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");
@@ -242,7 +242,7 @@ void set_default_settings()
 	settings->setDefault("enable_fog", "false");
 	settings->setDefault("fog_start", "0.4");
 	settings->setDefault("3d_mode", "none");
-	settings->setDefault("3d_paralax_strength", "0.025");
+	settings->setDefault("3d_paralax_strength", "0.0");
 	settings->setDefault("tooltip_show_delay", "400");
 	settings->setDefault("tooltip_append_itemname", "false");
 	settings->setDefault("fps_max", "60");
@@ -570,7 +570,7 @@ void set_default_settings()
 	settings->setDefault("server_map_save_interval", "15");
 	settings->setDefault("client_mapblock_limit", "1000");
 	settings->setDefault("active_block_range", "2");
-	settings->setDefault("viewing_range", "50");
+	settings->setDefault("viewing_range", "20");
 	settings->setDefault("leaves_style", "simple");
 	settings->setDefault("enable_post_processing", "false");
 	settings->setDefault("debanding", "false");
