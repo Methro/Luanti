@@ -106,6 +106,7 @@ void set_default_settings()
 	settings->setDefault("mesh_generation_interval", "0");
 	settings->setDefault("mesh_generation_threads", "0");
 	settings->setDefault("free_move", "false");
+	settings->setDefault("toggle_sneak", "false");
 	settings->setDefault("pitch_move", "false");
 	settings->setDefault("fast_move", "false");
 	settings->setDefault("noclip", "false");
@@ -137,6 +138,7 @@ void set_default_settings()
 	settings->setDefault("keymap_right", "KEY_KEY_D");
 	settings->setDefault("keymap_jump", "KEY_SPACE");
 	settings->setDefault("keymap_sneak", "KEY_LSHIFT");
+	settings->setDefault("keymap_toggle_sneak", "KEY_KEY_J");
 	settings->setDefault("keymap_dig", "KEY_LBUTTON");
 	settings->setDefault("keymap_place", "KEY_RBUTTON");
 	settings->setDefault("keymap_drop", "KEY_KEY_Q");
