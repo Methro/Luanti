@@ -6,7 +6,7 @@ AppDir:
     id: net.minetest.minetest
     name: Luanti
     icon: luanti
-    version: !ENV ${VERSION}
+    version: 5.11.0-dev
     exec: usr/bin/luanti
     exec_args: $@
   files:
@@ -18,21 +18,20 @@ AppDir:
   apt:
     arch: amd64
     sources:
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ focal main universe
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ focal-updates main universe
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ focal-backports main universe
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ focal-security main universe
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy main universe
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-updates main universe
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-backports main universe
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-security main universe
 
     include:
       - libc6
       - libcrypt1
-      - libcurl3-gnutls
       - libcurl4
       - libfreetype6
       - libgl1
       - libjpeg-turbo8
-      - libjsoncpp1
+      - libjsoncpp25
       - libleveldb1d
       - libluajit-5.1-2
       - libopenal1
@@ -47,6 +46,7 @@ AppImage:
   update-information: guess
   sign-key: None
   arch: x86_64
+  comp: gzip
 script: |
     # Compile and install binaries into AppDir
     cmake -B appimage-build -DENABLE_REDIS=FALSE -DENABLE_POSTGRESQL=OFF -DCMAKE_INSTALL_PREFIX=AppDir/usr/ -DBUILD_SERVER=FALSE -DENABLE_GETTEXT=TRUE -DCMAKE_BUILD_TYPE=Release -DRUN_IN_PLACE=FALSE

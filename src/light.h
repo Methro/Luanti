@@ -6,6 +6,7 @@
 #include <cassert>
 #include "config.h"
 #include "irrlichttypes.h"
+#include "settings.h"
 
 /*
 	Lower level lighting stuff

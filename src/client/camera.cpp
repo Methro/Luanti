@@ -501,9 +501,23 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	if (m_arm_inertia)
 		addArmInertia(yaw);
 
+	// Read left-handed mode from the settings
+	bool left_hand_mode = false;
+	if (g_settings->exists("enable_left_hand")) {
+	    left_hand_mode = g_settings->getBool("enable_left_hand");
+	}
+
 	// Position the wielded item
 	v3f wield_position = v3f(m_wieldmesh_offset.X, m_wieldmesh_offset.Y, 65);
 	v3f wield_rotation = v3f(-100, 120, -100);
+
+	// Invert the X position when left-handed mode is active
+	if (left_hand_mode) {
+	    wield_position.X = -wield_position.X;
+	    wield_rotation.Y = -wield_rotation.Y + 270;
+	}
+
+
 	wield_position.Y += std::abs(m_wield_change_timer)*320 - 40;
 	if(m_digging_anim < 0.05 || m_digging_anim > 0.5)
 	{
@@ -545,27 +559,30 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	// Set render distance
 	updateViewingRange();
 
-	// If the player is walking, swimming, or climbing,
-	// view bobbing is enabled and free_move is off,
-	// start (or continue) the view bobbing animation.
-	const v3f &speed = player->getSpeed();
-	const bool movement_XZ = std::hypot(speed.X, speed.Z) > BS;
-	const bool movement_Y = std::abs(speed.Y) > BS;
+// Bool to disable/enable view_bobbing
+const bool disable_view_bobbing = g_settings->getBool("disable_view_bobbing");
 
-	const bool walking = movement_XZ && player->touching_ground;
-	const bool swimming = (movement_XZ || player->swimming_vertical) && player->in_liquid;
-	const bool climbing = movement_Y && player->is_climbing;
-	const bool flying = g_settings->getBool("free_move")
-		&& m_client->checkLocalPrivilege("fly");
-	if ((walking || swimming || climbing) && !flying) {
-		// Start animation
-		m_view_bobbing_state = 1;
-		m_view_bobbing_speed = MYMIN(speed.getLength(), 70);
-	} else if (m_view_bobbing_state == 1) {
-		// Stop animation
-		m_view_bobbing_state = 2;
-		m_view_bobbing_speed = 60;
-	}
+
+
+const v3f &speed = player->getSpeed();
+const bool movement_XZ = std::hypot(speed.X, speed.Z) > BS;
+const bool movement_Y = std::abs(speed.Y) > BS;
+
+const bool walking = movement_XZ && player->touching_ground;
+const bool swimming = (movement_XZ || player->swimming_vertical) && player->in_liquid;
+const bool climbing = movement_Y && player->is_climbing;
+const bool falling = speed.Y < -BS;
+const bool flying = g_settings->getBool("free_move") && m_client->checkLocalPrivilege("fly");
+
+
+if (!disable_view_bobbing && (walking || swimming || climbing || falling || flying)) {
+m_view_bobbing_state = 0;
+} else if (m_view_bobbing_state == 1) {
+
+	m_view_bobbing_state = 0;
+	m_view_bobbing_speed = 0;
+}
+
 }
 
 void Camera::updateViewingRange()

@@ -898,6 +898,9 @@ void GenericCAO::updateLight(u32 day_night_ratio)
 	else
 		final_color_blend(&light, light_at_pos, day_night_ratio);
 
+	if (g_settings->getBool("fullbright"))
+		light = video::SColor(0xFFFFFFFF);
+
 	if (light != m_last_light) {
 		m_last_light = light;
 		setNodeLight(light);
