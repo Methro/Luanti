@@ -74,12 +74,13 @@ void MeshMakeData::setSmoothLighting(bool smooth_lighting)
 static u8 getInteriorLight(enum LightBank bank, MapNode n, s32 increment,
 	const NodeDefManager *ndef)
 {
-	if (g_settings->getBool("fullbright"))
-		return 255;
-	
+
+if (g_settings->getBool("fullbright"))
+	return 255;
+
 	u8 light = n.getLight(bank, ndef->getLightingFlags(n));
 	light = rangelim(light + increment, 0, LIGHT_SUN);
-	return decode_light(light);
+		return decode_light(light);
 }
 
 /*
