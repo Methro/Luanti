@@ -717,7 +717,6 @@ protected:
 	void toggleCinematic();
 	void toggleBlockBounds();
 	void toggleAutoforward();
-	
 
 	void toggleMinimap(bool shift_pressed);
 	void toggleFog();
@@ -998,7 +997,6 @@ Game::Game() :
 		&settingChangedCallback, this);
 	g_settings->registerChangedCallback("pause_on_lost_focus",
 		&settingChangedCallback, this);
-
 	g_settings->registerChangedCallback("fullbright",
 		&settingChangedCallback, this);
 
@@ -1032,7 +1030,7 @@ Game::~Game()
 	clearTextureNameCache();
 
 	g_settings->deregisterAllChangedCallbacks(this);
-	
+
 	if (m_rendering_engine)
 		m_rendering_engine->finalize();
 }
@@ -2443,7 +2441,6 @@ void Game::toggleAutoforward()
 		m_game_ui->showTranslatedStatusText("Automatic forward disabled");
 }
 
-
 void Game::toggleMinimap(bool shift_pressed)
 {
 	if (!mapper || !m_game_ui->m_flags.show_hud || !g_settings->getBool("enable_minimap"))
@@ -2722,7 +2719,6 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		input->getJoystickSpeed(),
 		input->getJoystickDirection()
 	);
-
 	control.setMovementFromKeys();
 
 	// autoforward if set: move at maximum speed
@@ -2869,7 +2865,6 @@ void Game::handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation 
 	 player->hurt_tilt_timer = 1.5f;
 	 player->hurt_tilt_strength = rangelim(damage_ratio * 5.0f, 1.0f, 4.0f);
 	*/
-
 	}
 
 	// Play damage sound
@@ -3650,7 +3645,7 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 
 	// formspec in meta
 	if (meta && !meta->getString("formspec").empty() && !input->isRandom()
-			&& !(isKeyDown(KeyType::SNEAK)) {
+			&& !isKeyDown(KeyType::SNEAK)) {
 		// on_rightclick callbacks are called anyway
 		if (nodedef_manager->get(map.getNode(nodepos)).rightclickable)
 			client->interact(INTERACT_PLACE, pointed);
@@ -3675,7 +3670,7 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 
 	// on_rightclick callback
 	if (prediction.empty() || (nodedef->get(node).rightclickable &&
-			!(isKeyDown(KeyType::SNEAK))) {
+			!isKeyDown(KeyType::SNEAK))) {
 		// Report to server
 		client->interact(INTERACT_PLACE, pointed);
 		return false;
@@ -4379,7 +4374,8 @@ void Game::drawScene(ProfilerGraph *graph, RunStats *stats)
 		graph->draw(10, screensize.Y - 10, driver, g_fontengine->getFont());
 
 	/*
-    Damage flash disabled (just to make sure)
+		Damage flash
+	
     if (this->runData.damage_flash > 0.0f) {
         video::SColor color(this->runData.damage_flash, 180, 0, 0);
         this->driver->draw2DRectangle(color,
@@ -4387,7 +4383,6 @@ void Game::drawScene(ProfilerGraph *graph, RunStats *stats)
                     NULL);
     }
 	*/
-
 	this->driver->endScene();
 
 	stats->drawtime = tt_draw.stop(true);
