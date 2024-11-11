@@ -75,7 +75,7 @@ void set_default_settings()
 	bool has_touch = detect_touch();
 
 	// Client and server
-	settings->setDefault("language", "");
+	settings->setDefault("language", "en");
 	settings->setDefault("name", "");
 	settings->setDefault("bind_address", "");
 	settings->setDefault("serverlist_url", "servers.luanti.org");
