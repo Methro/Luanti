@@ -1221,8 +1221,7 @@ void Game::shutdown()
 
 	/* cleanup menus */
 	while (g_menumgr.menuCount() > 0) {
-		g_menumgr.m_stack.front()->setVisible(false);
-		g_menumgr.deletingMenu(g_menumgr.m_stack.front());
+		g_menumgr.deleteFront();
 	}
 
 	m_game_ui->deleteFormspec();
