@@ -32,7 +32,7 @@ u32 Environment::getDayNightRatio()
 	if (m_enable_day_night_ratio_override)
 		return m_day_night_ratio_override;
 	if (g_settings->getBool("fullbright"))
-		return time_to_daynight_ratio(24000);
+		return time_to_daynight_ratio(24000, true);
 	else	
 		return time_to_daynight_ratio(m_time_of_day_f * 24000, true);
 }
