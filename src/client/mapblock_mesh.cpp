@@ -59,7 +59,7 @@ void MeshMakeData::setCrack(int crack_level, v3s16 crack_pos)
 
 void MeshMakeData::setSmoothLighting(bool smooth_lighting)
 {
-	m_smooth_lighting = smooth_lighting;
+	m_smooth_lighting = smooth_lighting && !g_settings->getBool("fullbright");
 }
 
 /*
@@ -73,9 +73,13 @@ void MeshMakeData::setSmoothLighting(bool smooth_lighting)
 static u8 getInteriorLight(enum LightBank bank, MapNode n, s32 increment,
 	const NodeDefManager *ndef)
 {
+
+if (g_settings->getBool("fullbright"))
+	return 255;
+
 	u8 light = n.getLight(bank, ndef->getLightingFlags(n));
 	light = rangelim(light + increment, 0, LIGHT_SUN);
-	return decode_light(light);
+		return decode_light(light);
 }
 
 /*
@@ -95,6 +99,9 @@ u16 getInteriorLight(MapNode n, s32 increment, const NodeDefManager *ndef)
 */
 static u8 getFaceLight(enum LightBank bank, MapNode n, MapNode n2, const NodeDefManager *ndef)
 {
+	if (g_settings->getBool("fullbright"))
+		return 255;
+
 	ContentLightingFlags f1 = ndef->getLightingFlags(n);
 	ContentLightingFlags f2 = ndef->getLightingFlags(n2);
 
@@ -111,7 +118,7 @@ static u8 getFaceLight(enum LightBank bank, MapNode n, MapNode n2, const NodeDef
 	if(light_source > light)
 		light = light_source;
 
-	return decode_light(light);
+		return decode_light(light);
 }
 
 /*

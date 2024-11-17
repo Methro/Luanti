@@ -104,6 +104,9 @@ aux1_descends (Aux1 key for climbing/descending) bool false
 #    Double-tapping the jump key toggles fly mode.
 doubletap_jump (Double tap jump for fly) bool false
 
+#    Enable fullbright to be able to see in the darkness
+fullbright (fullbright) bool true
+
 #    If disabled, "Aux1" key is used to fly fast if both fly and fast mode are
 #    enabled.
 always_fly_fast (Always fly fast) bool true
@@ -295,6 +298,12 @@ view_bobbing_amount (View bobbing factor) float 1.0 0.0 7.9
 #    Multiplier for fall bobbing.
 #    For example: 0 for no view bobbing; 1.0 for normal; 2.0 for double.
 fall_bobbing_amount (Fall bobbing factor) float 0.03 0.0 100.0
+
+# Disabling arm movement animation when walking, climbing, falling, swimming.
+# For example: true means no arm movement in those scenarios while disabling it is the opposite
+
+disable_view_bobbing (Disable arm bobbing) bool false
+
 
 [**Camera]
 
@@ -720,6 +729,9 @@ show_debug (Show debug info) bool false
 
 #    Radius to use when the block bounds HUD feature is set to near blocks.
 show_block_bounds_radius_near (Block bounds HUD radius) int 4 0 1000
+
+#    Enables left-hand mode for wielded items in the HUD.
+enable_left_hand (Enable Left-Hand Mode) bool false
 
 #    Maximum proportion of current window to be used for hotbar.
 #    Useful if there's something to be displayed right or left of hotbar.
@@ -2334,6 +2346,9 @@ keymap_jump (Jump key) key KEY_SPACE
 #    Key for sneaking.
 #    Also used for climbing down and descending in water if aux1_descends is disabled.
 keymap_sneak (Sneak key) key KEY_LSHIFT
+
+#    Key for Toggle Sneak.
+keymap_toggle_sneak (Toggle Sneak key) key
 
 #    Key for digging, punching or using something.
 #    (Note: The actual meaning might vary on a per-game basis.)
