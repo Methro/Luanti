@@ -263,7 +263,7 @@ void set_default_settings()
 	settings->setDefault("lighting_boost", "0.2");
 	settings->setDefault("lighting_boost_center", "0.5");
 	settings->setDefault("lighting_boost_spread", "0.2");
-	settings->setDefault("texture_path", "");
+	settings->setDefault("texture_path", porting::getDataPath("textures" DIR_ELEM "Cefiro-16x"));
 	settings->setDefault("shader_path", "");
 	settings->setDefault("video_driver", "");
 	settings->setDefault("cinematic", "false");
