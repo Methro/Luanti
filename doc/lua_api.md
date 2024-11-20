@@ -5657,6 +5657,8 @@ Utilities
       abm_without_neighbors = true,
       -- biomes have a weight parameter (5.11.0)
       biome_weights = true,
+      -- Particles can specify a "clip" blend mode (5.11.0)
+      particle_blend_clip = true,
   }
   ```
 
@@ -8890,7 +8892,7 @@ For `core.get_perlin_map()`, the actual seed used is the noiseparams seed
 plus the world seed, to create world-specific noise.
 
 Format of `size` is `{x=dimx, y=dimy, z=dimz}`. The `z` component is omitted
-for 2D noise, and it must be must be larger than 1 for 3D noise (otherwise
+for 2D noise, and it must be larger than 1 for 3D noise (otherwise
 `nil` is returned).
 
 For each of the functions with an optional `buffer` parameter: If `buffer` is
@@ -11483,6 +11485,14 @@ texture = {
     -- (default) blends transparent pixels with those they are drawn atop
     -- according to the alpha channel of the source texture. useful for
     -- e.g. material objects like rocks, dirt, smoke, or node chunks
+    -- note: there will be rendering bugs when particles interact with
+    -- translucent nodes. particles are also not transparency-sorted
+    -- relative to each other.
+    blend = "clip",
+    -- pixels are either fully opaque or fully transparent,
+    -- depending on whether alpha is greater than or less than 50%
+    -- (just like `use_texture_alpha = "clip"` for nodes).
+    -- you should prefer this if you don't need semi-transparency, as it's faster.
     blend = "add",
     -- adds the value of pixels to those underneath them, modulo the sources
     -- alpha channel. useful for e.g. bright light effects like sparks or fire
