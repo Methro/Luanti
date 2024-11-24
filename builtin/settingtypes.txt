@@ -104,9 +104,6 @@ aux1_descends (Aux1 key for climbing/descending) bool false
 #    Double-tapping the jump key toggles fly mode.
 doubletap_jump (Double tap jump for fly) bool false
 
-#    Enable fullbright to be able to see in the darkness
-fullbright (fullbright) bool true
-
 #    If disabled, "Aux1" key is used to fly fast if both fly and fast mode are
 #    enabled.
 always_fly_fast (Always fly fast) bool true
@@ -1947,7 +1944,7 @@ font_size_divisible_by (Font size divisible by) int 1 1
 
 #    Path to the default font. Must be a TrueType font.
 #    The fallback font will be used if the font cannot be loaded.
-font_path (Regular font path) filepath fonts/Arimo-Regular.ttf
+font_path (Regular font path) filepath fonts/Arimo-MC.ttf
 
 font_path_bold (Bold font path) filepath fonts/Arimo-Bold.ttf
 font_path_italic (Italic font path) filepath fonts/Arimo-Italic.ttf
