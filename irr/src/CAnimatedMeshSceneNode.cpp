@@ -7,7 +7,7 @@
 #include "ISceneManager.h"
 #include "S3DVertex.h"
 #include "os.h"
-#include "CSkinnedMesh.h"
+#include "SkinnedMesh.h"
 #include "IDummyTransformationSceneNode.h"
 #include "IBoneSceneNode.h"
 #include "IMaterialRenderer.h"
@@ -165,12 +165,12 @@ IMesh *CAnimatedMeshSceneNode::getMeshForCurrentFrame()
 		// As multiple scene nodes may be sharing the same skinned mesh, we have to
 		// re-animate it every frame to ensure that this node gets the mesh that it needs.
 
-		CSkinnedMesh *skinnedMesh = static_cast<CSkinnedMesh *>(Mesh);
+		SkinnedMesh *skinnedMesh = static_cast<SkinnedMesh *>(Mesh);
 
 		if (JointMode == EJUOR_CONTROL) // write to mesh
 			skinnedMesh->transferJointsToMesh(JointChildSceneNodes);
 		else
-			skinnedMesh->animateMesh(getFrameNr(), 1.0f);
+			skinnedMesh->animateMesh(getFrameNr());
 
 		// Update the skinned mesh for the current joint transforms.
 		skinnedMesh->skinMesh();
@@ -299,12 +299,10 @@ void CAnimatedMeshSceneNode::render()
 			if (Mesh->getMeshType() == EAMT_SKINNED) {
 				// draw skeleton
 
-				for (u32 g = 0; g < ((ISkinnedMesh *)Mesh)->getAllJoints().size(); ++g) {
-					ISkinnedMesh::SJoint *joint = ((ISkinnedMesh *)Mesh)->getAllJoints()[g];
-
-					for (u32 n = 0; n < joint->Children.size(); ++n) {
+				for (auto *joint : ((SkinnedMesh *)Mesh)->getAllJoints()) {
+					for (const auto *childJoint : joint->Children) {
 						driver->draw3DLine(joint->GlobalAnimatedMatrix.getTranslation(),
-								joint->Children[n]->GlobalAnimatedMatrix.getTranslation(),
+								childJoint->GlobalAnimatedMatrix.getTranslation(),
 								video::SColor(255, 51, 66, 255));
 					}
 				}
@@ -404,7 +402,7 @@ IBoneSceneNode *CAnimatedMeshSceneNode::getJointNode(const c8 *jointName)
 
 	checkJoints();
 
-	ISkinnedMesh *skinnedMesh = (ISkinnedMesh *)Mesh;
+	auto *skinnedMesh = (SkinnedMesh *)Mesh;
 
 	const std::optional<u32> number = skinnedMesh->getJointNumber(jointName);
 
@@ -446,7 +444,7 @@ u32 CAnimatedMeshSceneNode::getJointCount() const
 	if (!Mesh || Mesh->getMeshType() != EAMT_SKINNED)
 		return 0;
 
-	ISkinnedMesh *skinnedMesh = (ISkinnedMesh *)Mesh;
+	auto *skinnedMesh = (SkinnedMesh *)Mesh;
 
 	return skinnedMesh->getJointCount();
 }
@@ -596,10 +594,9 @@ void CAnimatedMeshSceneNode::animateJoints(bool CalculateAbsolutePositions)
 		checkJoints();
 		const f32 frame = getFrameNr(); // old?
 
-		CSkinnedMesh *skinnedMesh = static_cast<CSkinnedMesh *>(Mesh);
+		SkinnedMesh *skinnedMesh = static_cast<SkinnedMesh *>(Mesh);
 
-		skinnedMesh->transferOnlyJointsHintsToMesh(JointChildSceneNodes);
-		skinnedMesh->animateMesh(frame, 1.0f);
+		skinnedMesh->animateMesh(frame);
 		skinnedMesh->recoverJointsFromMesh(JointChildSceneNodes);
 
 		//-----------------------------------------
@@ -671,8 +668,8 @@ void CAnimatedMeshSceneNode::checkJoints()
 		JointChildSceneNodes.clear();
 
 		// Create joints for SkinnedMesh
-		((CSkinnedMesh *)Mesh)->addJoints(JointChildSceneNodes, this, SceneManager);
-		((CSkinnedMesh *)Mesh)->recoverJointsFromMesh(JointChildSceneNodes);
+		((SkinnedMesh *)Mesh)->addJoints(JointChildSceneNodes, this, SceneManager);
+		((SkinnedMesh *)Mesh)->recoverJointsFromMesh(JointChildSceneNodes);
 
 		JointsUsed = true;
 		JointMode = EJUOR_READ;

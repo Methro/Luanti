@@ -309,17 +309,24 @@ it unlocks no special rendering features.
 Binary glTF (`.glb`) files are supported and recommended over `.gltf` files
 due to their space savings.
 
-This means that many glTF features are not supported *yet*, including:
+Bone weights should be normalized, e.g. using ["normalize all" in Blender](https://docs.blender.org/manual/en/4.2/grease_pencil/modes/weight_paint/weights_menu.html#normalize-all).
+
+You can use the [Khronos glTF validator](https://github.com/KhronosGroup/glTF-Validator)
+to check whether a model is a valid glTF file.
+
+Many glTF features are not supported *yet*, including:
 
 * Animations
   * Only a single animation is supported, use frame ranges within this animation.
+  * Only linear interpolation is supported.
 * Cameras
 * Materials
   * Only base color textures are supported
   * Backface culling is overridden
   * Double-sided materials don't work
 * Alternative means of supplying data
-  * Embedded images
+  * Embedded images. You can use `gltfutil.py` from the
+    [modding tools](https://github.com/minetest/modtools) to strip or extract embedded images.
   * References to files via URIs
 
 Textures are supplied solely via the same means as for the other model file formats:
@@ -6180,7 +6187,7 @@ Setting-related
 * `core.settings`: Settings object containing all of the settings from the
   main config file (`minetest.conf`). See [`Settings`].
 * `core.setting_get_pos(name)`: Loads a setting from the main settings and
-  parses it as a position (in the format `(1,2,3)`). Returns a position or nil.
+  parses it as a position (in the format `(1,2,3)`). Returns a position or nil. **Deprecated: use `core.settings:get_pos()` instead**
 
 Authentication
 --------------
@@ -6581,6 +6588,9 @@ Environment access
       on-the-fly
 * `core.spawn_tree (pos, {treedef})`
     * spawns L-system tree at given `pos` with definition in `treedef` table
+* `core.spawn_tree_on_vmanip(vmanip, pos, treedef)`
+    * analogous to `core.spawn_tree`, but spawns a L-system tree onto the specified
+      VoxelManip object `vmanip` instead of the map.
 * `core.transforming_liquid_add(pos)`
     * add node to liquid flow update queue
 * `core.get_node_max_level(pos)`
@@ -9051,6 +9061,9 @@ means that no defaults will be returned for mod settings.
     * Is currently limited to mapgen flags `mg_flags` and mapgen-specific
       flags like `mgv5_spflags`.
     * Returns `nil` if `key` is not found.
+* `get_pos(key)`:
+    * Returns a `vector`
+    * Returns `nil` if no value is found or parsing failed.
 * `set(key, value)`
     * Setting names can't contain whitespace or any of `="{}#`.
     * Setting values can't contain the sequence `\n"""`.
@@ -9060,6 +9073,9 @@ means that no defaults will be returned for mod settings.
     * See documentation for `set()` above.
 * `set_np_group(key, value)`
     * `value` is a NoiseParams table.
+    * Also, see documentation for `set()` above.
+* `set_pos(key, value)`
+    * `value` is a `vector`.
     * Also, see documentation for `set()` above.
 * `remove(key)`: returns a boolean (`true` for success)
 * `get_names()`: returns `{key1,...}`

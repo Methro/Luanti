@@ -55,19 +55,29 @@ local function get_sorted_servers()
 	return servers
 end
 
+local function is_selected_fav(server)
+	local address = core.settings:get("address")
+	local port = tonumber(core.settings:get("remote_port"))
+
+	for _, fav in ipairs(serverlistmgr.get_favorites()) do
+		if address == fav.address and port == fav.port then
+			return true
+		end
+	end
+	return false
+end
+
 -- Persists the selected server in the "address" and "remote_port" settings
+
 local function set_selected_server(server)
+	if server == nil then -- reset selection
+		core.settings:remove("address")
+		core.settings:remove("remote_port")
+		return
+	end
 	local address = server.address
 	local port    = server.port
 	gamedata.serverdescription = server.description
-
-	gamedata.fav = false
-	for _, fav in ipairs(serverlistmgr.get_favorites()) do
-		if address == fav.address and port == fav.port then
-			gamedata.fav = true
-			break
-		end
-	end
 
 	if address and port then
 		core.settings:set("address", address)
@@ -79,6 +89,11 @@ local function find_selected_server()
 	local address = core.settings:get("address")
 	local port = tonumber(core.settings:get("remote_port"))
 	for _, server in ipairs(serverlistmgr.servers) do
+		if server.address == address and server.port == port then
+			return server
+		end
+	end
+	for _, server in ipairs(serverlistmgr.get_favorites()) do
 		if server.address == address and server.port == port then
 			return server
 		end
@@ -160,15 +175,20 @@ local function get_formspec(tabview, name, tabdata)
 						fgettext("Clients:\n$1", table.concat(clients_list, "\n")) .. "]"
 			end
 			retval = retval .. "style[btn_view_clients;padding=6]"
-			retval = retval .. "image_button[5,1.3;0.5,0.5;" .. core.formspec_escape(defaulttexturedir ..
+			retval = retval .. "image_button[4.5,1.3;0.5,0.5;" .. core.formspec_escape(defaulttexturedir ..
 				"server_view_clients.png") .. ";btn_view_clients;]"
 		end
 
-		if gamedata.fav then
+		if is_selected_fav() then
 			retval = retval .. "tooltip[btn_delete_favorite;" .. fgettext("Remove favorite") .. "]"
 			retval = retval .. "style[btn_delete_favorite;padding=6]"
-			retval = retval .. "image_button[" .. (can_view_clients_list and "4.5" or "5") .. ",1.3;0.5,0.5;" ..
+			retval = retval .. "image_button[5,1.3;0.5,0.5;" ..
 				core.formspec_escape(defaulttexturedir .. "server_favorite_delete.png") .. ";btn_delete_favorite;]"
+		else
+			retval = retval .. "tooltip[btn_add_favorite;" .. fgettext("Add favorite") .. "]"
+			retval = retval .. "style[btn_add_favorite;padding=6]"
+			retval = retval .. "image_button[5,1.3;0.5,0.5;" ..
+				core.formspec_escape(defaulttexturedir .. "server_favorite.png") .. ";btn_add_favorite;]"
 		end
 	end
 
@@ -331,6 +351,11 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		end
 	end
 
+	if fields.btn_add_favorite then
+		serverlistmgr.add_favorite(find_selected_server())
+		return true
+	end
+
 	if fields.btn_delete_favorite then
 		local idx = core.get_table_index("servers")
 		if not idx then return end
@@ -360,6 +385,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		tabdata.search_for = fields.te_search
 		search_server_list(fields.te_search:lower())
 		if menudata.search_result then
+			-- Note: This clears the selection if there are no results
 			set_selected_server(menudata.search_result[1])
 		end
 
