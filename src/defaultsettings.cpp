@@ -301,6 +301,7 @@ void set_default_settings()
 	settings->setDefault("ambient_occlusion_gamma", "1.8");
 	settings->setDefault("enable_shaders", "false");
 	settings->setDefault("enable_particles", "false");
+	settings->setDefault("norender_particles","true");
 	settings->setDefault("arm_inertia", "false");
 	settings->setDefault("enable_left_hand", "false");
 	settings->setDefault("show_nametag_backgrounds", "true");

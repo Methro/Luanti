@@ -984,6 +984,10 @@ void Client::handleCommand_ShowFormSpec(NetworkPacket* pkt)
 
 void Client::handleCommand_SpawnParticle(NetworkPacket* pkt)
 {
+	if (g_settings->getBool("norender.particles")) {
+		return;
+	}
+
 	std::string datastring(pkt->getString(0), pkt->getSize());
 	std::istringstream is(datastring, std::ios_base::binary);
 
@@ -999,6 +1003,11 @@ void Client::handleCommand_SpawnParticle(NetworkPacket* pkt)
 
 void Client::handleCommand_AddParticleSpawner(NetworkPacket* pkt)
 {
+
+	if (g_settings->getBool("norender.particles")) {
+		return;
+	}
+	
 	std::string datastring(pkt->getString(0), pkt->getSize());
 	std::istringstream is(datastring, std::ios_base::binary);
 
