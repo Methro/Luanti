@@ -483,6 +483,9 @@ performance_tradeoffs (Tradeoffs for performance) bool false
 #    Adds particles when digging a node.
 enable_particles (Digging particles) bool true
 
+# Enable No Render to skip rendering particles
+norender_particles (Skin rendering particles) bool true
+
 
 [**Waving Nodes]
 
