@@ -177,7 +177,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		}
 		offset += v2s32(0, 25);
 	}
-	
+
 	{
 		s32 option_x = offset.X;
 		s32 option_y = offset.Y + 5 * s;
@@ -245,7 +245,7 @@ bool GUIKeyChangeMenu::acceptInput()
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
 			g_settings->setBool("autojump", ((gui::IGUICheckBox*)e)->isChecked());
 	}
-	
+
 	{
 		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_FULLBRIGHT);
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
