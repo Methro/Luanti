@@ -514,7 +514,6 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	// Ajustar la posición y rotación para el modo zurdo
 	if (left_hand_mode) {
 		wield_position.X = -wield_position.X;
-		wield_rotation.Y = -wield_rotation.Y + 270;
 	}
 
 	// Lógica para animaciones
