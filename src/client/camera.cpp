@@ -515,8 +515,6 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	if (left_hand_mode) {
 		wield_position.X = -wield_position.X;
 		wield_rotation.Y = -wield_rotation.Y + 270;
-	} else {
-		wield_position.X -= 20; // Ajuste estándar para diestros
 	}
 
 	// Lógica para animaciones
