@@ -501,29 +501,29 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	if (m_arm_inertia)
 		addArmInertia(yaw);
 
-// Leer el modo zurdo desde las configuraciones
-bool left_hand_mode = false;
-if (g_settings->exists("enable_left_hand")) {
-    left_hand_mode = g_settings->getBool("enable_left_hand");
-}
+	// Leer el modo zurdo desde las configuraciones
+	bool left_hand_mode = false;
+	if (g_settings->exists("enable_left_hand")) {
+		left_hand_mode = g_settings->getBool("enable_left_hand");
+	}
 
-// Declarar las variables de posición y rotación del objeto empuñado
-v3f wield_position = v3f(m_wieldmesh_offset.X, m_wieldmesh_offset.Y, 65);
-v3f wield_rotation = v3f(-100, 120, -100);
+	// Declarar las variables de posición y rotación del objeto empuñado
+	v3f wield_position = v3f(m_wieldmesh_offset.X, m_wieldmesh_offset.Y, 65);
+	v3f wield_rotation = v3f(-100, 120, -100);
 
-// Ajustar la posición y rotación para el modo zurdo
-if (left_hand_mode) {
-    wield_position.X = -wield_position.X - 20; // Invertir y desplazar hacia la izquierda
-    wield_rotation.Y = -wield_rotation.Y + 270; // Ajustar la rotación para zurdos
-} else {
-    wield_position.X -= 20; // Ajuste estándar para diestros
-}
+	// Ajustar la posición y rotación para el modo zurdo
+	if (left_hand_mode) {
+		wield_position.X = -wield_position.X;
+		wield_rotation.Y = -wield_rotation.Y + 270;
+	} else {
+		wield_position.X -= 20; // Ajuste estándar para diestros
+	}
 
-// Lógica para animaciones
-wield_position.Y += std::abs(m_wield_change_timer) * 320 - 40;
+	// Lógica para animaciones
+	wield_position.Y += std::abs(m_wield_change_timer) * 320 - 40;
 
-if (m_digging_anim < 0.05 || m_digging_anim > 0.5) {
-    f32 frac = 1.0;
+	if (m_digging_anim < 0.05 || m_digging_anim > 0.5) {
+		f32 frac = 1.0;
     if (m_digging_anim > 0.5)
         frac = 2.0 * (m_digging_anim - 0.5);
 
@@ -543,8 +543,8 @@ if (m_digging_anim < 0.05 || m_digging_anim > 0.5) {
     }
 }
 
-if (m_digging_button != -1) {
-    f32 digfrac = m_digging_anim;
+	if (m_digging_button != -1) {
+		f32 digfrac = m_digging_anim;
 
     // Ajustar animación de excavación
     if (left_hand_mode) {
@@ -563,8 +563,9 @@ if (m_digging_button != -1) {
     quat_slerp.slerp(quat_begin, quat_end, std::sin(digfrac * M_PI));
     quat_slerp.toEuler(wield_rotation);
     wield_rotation *= core::RADTODEG;
-} else {
-    f32 bobfrac = my_modf(m_view_bobbing_anim);
+
+	} else {
+		f32 bobfrac = my_modf(m_view_bobbing_anim);
 
     // Ajustar movimiento oscilante
     if (left_hand_mode) {
@@ -576,13 +577,13 @@ if (m_digging_button != -1) {
     wield_position.Y += std::sin(my_modf(bobfrac * 2.0) * M_PI) * 3.0;
 }
 
-// Establecer posición y rotación
-m_wieldnode->setPosition(wield_position);
-m_wieldnode->setRotation(wield_rotation);
+	// Establecer posición y rotación
+	m_wieldnode->setPosition(wield_position);
+	m_wieldnode->setRotation(wield_rotation);
 
-// Ajustar el color de la luz del jugador
-m_player_light_color = player->light_color;
-m_wieldnode->setNodeLightColor(m_player_light_color);
+	// Ajustar el color de la luz del jugador
+	m_player_light_color = player->light_color;
+	m_wieldnode->setNodeLightColor(m_player_light_color);
 
 	// Set render distance
 	updateViewingRange();
