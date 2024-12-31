@@ -32,11 +32,7 @@ COpenGLDriver::COpenGLDriver(const SIrrlichtCreationParameters &params, io::IFil
 		CNullDriver(io, params.WindowSize), COpenGLExtensionHandler(), CacheHandler(0), CurrentRenderMode(ERM_NONE), ResetRenderStates(true),
 		Transformation3DChanged(true), AntiAlias(params.AntiAlias), ColorFormat(ECF_R8G8B8), FixedPipelineState(EOFPS_ENABLE), Params(params),
 		ContextManager(contextManager)
-{
-#ifdef _DEBUG
-	setDebugName("COpenGLDriver");
-#endif
-}
+{}
 
 bool COpenGLDriver::initDriver()
 {
@@ -434,9 +430,7 @@ COpenGLDriver::SHWBufferLink *COpenGLDriver::createHardwareBuffer(const scene::I
 		return 0;
 
 	SHWBufferLink_opengl *HWBuffer = new SHWBufferLink_opengl(vb);
-
-	// add to map
-	HWBuffer->listPosition = HWBufferList.insert(HWBufferList.end(), HWBuffer);
+	registerHardwareBuffer(HWBuffer);
 
 	if (!updateVertexHardwareBuffer(HWBuffer)) {
 		deleteHardwareBuffer(HWBuffer);
@@ -457,9 +451,7 @@ COpenGLDriver::SHWBufferLink *COpenGLDriver::createHardwareBuffer(const scene::I
 		return 0;
 
 	SHWBufferLink_opengl *HWBuffer = new SHWBufferLink_opengl(ib);
-
-	// add to map
-	HWBuffer->listPosition = HWBufferList.insert(HWBufferList.end(), HWBuffer);
+	registerHardwareBuffer(HWBuffer);
 
 	if (!updateIndexHardwareBuffer(HWBuffer)) {
 		deleteHardwareBuffer(HWBuffer);
@@ -2662,14 +2654,9 @@ bool COpenGLDriver::setPixelShaderConstant(s32 index, const u32 *ints, int count
 //! Adds a new material renderer to the VideoDriver, using GLSL to render geometry.
 s32 COpenGLDriver::addHighLevelShaderMaterial(
 		const c8 *vertexShaderProgram,
-		const c8 *vertexShaderEntryPointName,
-		E_VERTEX_SHADER_TYPE vsCompileTarget,
 		const c8 *pixelShaderProgram,
-		const c8 *pixelShaderEntryPointName,
-		E_PIXEL_SHADER_TYPE psCompileTarget,
 		const c8 *geometryShaderProgram,
-		const c8 *geometryShaderEntryPointName,
-		E_GEOMETRY_SHADER_TYPE gsCompileTarget,
+		const c8 *shaderName,
 		scene::E_PRIMITIVE_TYPE inType,
 		scene::E_PRIMITIVE_TYPE outType,
 		u32 verticesOut,
@@ -2681,9 +2668,9 @@ s32 COpenGLDriver::addHighLevelShaderMaterial(
 
 	COpenGLSLMaterialRenderer *r = new COpenGLSLMaterialRenderer(
 			this, nr,
-			vertexShaderProgram, vertexShaderEntryPointName, vsCompileTarget,
-			pixelShaderProgram, pixelShaderEntryPointName, psCompileTarget,
-			geometryShaderProgram, geometryShaderEntryPointName, gsCompileTarget,
+			vertexShaderProgram,
+			pixelShaderProgram,
+			geometryShaderProgram,
 			inType, outType, verticesOut,
 			callback, baseMaterial, userData);
 

@@ -501,58 +501,84 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	if (m_arm_inertia)
 		addArmInertia(yaw);
 
-	// Read left-handed mode from the settings
+	// Leer el modo zurdo desde las configuraciones
 	bool left_hand_mode = false;
 	if (g_settings->exists("enable_left_hand")) {
-	    left_hand_mode = g_settings->getBool("enable_left_hand");
+		left_hand_mode = g_settings->getBool("enable_left_hand");
 	}
 
-	// Position the wielded item
+	// Declarar las variables de posición y rotación del objeto empuñado
 	v3f wield_position = v3f(m_wieldmesh_offset.X, m_wieldmesh_offset.Y, 65);
 	v3f wield_rotation = v3f(-100, 120, -100);
 
-	// Invert the X position when left-handed mode is active
+	// Ajustar la posición y rotación para el modo zurdo
 	if (left_hand_mode) {
-	    wield_position.X = -wield_position.X;
-	    wield_rotation.Y = -wield_rotation.Y + 270;
+		wield_position.X = -wield_position.X;
 	}
 
+	// Lógica para animaciones
+	wield_position.Y += std::abs(m_wield_change_timer) * 320 - 40;
 
-	wield_position.Y += std::abs(m_wield_change_timer)*320 - 40;
-	if(m_digging_anim < 0.05 || m_digging_anim > 0.5)
-	{
+	if (m_digging_anim < 0.05 || m_digging_anim > 0.5) {
 		f32 frac = 1.0;
-		if(m_digging_anim > 0.5)
-			frac = 2.0 * (m_digging_anim - 0.5);
-		// This value starts from 1 and settles to 0
-		f32 ratiothing = std::pow((1.0f - tool_reload_ratio), 0.5f);
-		f32 ratiothing2 = (easeCurve(ratiothing*0.5))*2.0;
-		wield_position.Y -= frac * 25.0f * std::pow(ratiothing2, 1.7f);
-		wield_position.X -= frac * 35.0f * std::pow(ratiothing2, 1.1f);
-		wield_rotation.Y += frac * 70.0f * std::pow(ratiothing2, 1.4f);
-	}
-	if (m_digging_button != -1)
-	{
-		f32 digfrac = m_digging_anim;
-		wield_position.X -= 50 * std::sin(std::pow(digfrac, 0.8f) * M_PI);
-		wield_position.Y += 24 * std::sin(digfrac * 1.8 * M_PI);
-		wield_position.Z += 25 * 0.5;
+    if (m_digging_anim > 0.5)
+        frac = 2.0 * (m_digging_anim - 0.5);
 
-		// Euler angles are PURE EVIL, so why not use quaternions?
-		core::quaternion quat_begin(wield_rotation * core::DEGTORAD);
-		core::quaternion quat_end(v3f(80, 30, 100) * core::DEGTORAD);
-		core::quaternion quat_slerp;
-		quat_slerp.slerp(quat_begin, quat_end, std::sin(digfrac * M_PI));
-		quat_slerp.toEuler(wield_rotation);
-		wield_rotation *= core::RADTODEG;
+    // Este valor comienza en 1 y se estabiliza en 0
+    f32 ratiothing = std::pow((1.0f - tool_reload_ratio), 0.5f);
+    f32 ratiothing2 = (easeCurve(ratiothing * 0.5)) * 2.0;
+
+    wield_position.Y -= frac * 25.0f * std::pow(ratiothing2, 1.7f);
+    
+    // Invertir comportamiento para zurdos
+    if (left_hand_mode) {
+        wield_position.X += frac * 35.0f * std::pow(ratiothing2, 1.1f);
+        wield_rotation.Y -= frac * 70.0f * std::pow(ratiothing2, 1.4f);
+    } else {
+        wield_position.X -= frac * 35.0f * std::pow(ratiothing2, 1.1f);
+        wield_rotation.Y += frac * 70.0f * std::pow(ratiothing2, 1.4f);
+    }
+}
+
+	if (m_digging_button != -1) {
+		f32 digfrac = m_digging_anim;
+
+    // Ajustar animación de excavación
+    if (left_hand_mode) {
+        wield_position.X += 50 * std::sin(std::pow(digfrac, 0.8f) * M_PI);
+    } else {
+        wield_position.X -= 50 * std::sin(std::pow(digfrac, 0.8f) * M_PI);
+    }
+
+    wield_position.Y += 24 * std::sin(digfrac * 1.8 * M_PI);
+    wield_position.Z += 25 * 0.5;
+
+    // Usar cuaterniones para rotaciones suaves
+    core::quaternion quat_begin(wield_rotation * core::DEGTORAD);
+    core::quaternion quat_end(v3f(80, (left_hand_mode ? -30 : 30), 100) * core::DEGTORAD); // Ajustar para zurdos
+    core::quaternion quat_slerp;
+    quat_slerp.slerp(quat_begin, quat_end, std::sin(digfrac * M_PI));
+    quat_slerp.toEuler(wield_rotation);
+    wield_rotation *= core::RADTODEG;
+
 	} else {
 		f32 bobfrac = my_modf(m_view_bobbing_anim);
-		wield_position.X -= std::sin(bobfrac*M_PI*2.0) * 3.0;
-		wield_position.Y += std::sin(my_modf(bobfrac*2.0)*M_PI) * 3.0;
-	}
+
+    // Ajustar movimiento oscilante
+    if (left_hand_mode) {
+        wield_position.X += std::sin(bobfrac * M_PI * 2.0) * 3.0;
+    } else {
+        wield_position.X -= std::sin(bobfrac * M_PI * 2.0) * 3.0;
+    }
+
+    wield_position.Y += std::sin(my_modf(bobfrac * 2.0) * M_PI) * 3.0;
+}
+
+	// Establecer posición y rotación
 	m_wieldnode->setPosition(wield_position);
 	m_wieldnode->setRotation(wield_rotation);
 
+	// Ajustar el color de la luz del jugador
 	m_player_light_color = player->light_color;
 	m_wieldnode->setNodeLightColor(m_player_light_color);
 
