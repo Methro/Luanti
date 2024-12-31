@@ -44,11 +44,6 @@ CSceneManager::CSceneManager(video::IVideoDriver *driver,
 		ActiveCamera(0), Parameters(0),
 		MeshCache(cache), CurrentRenderPass(ESNRP_NONE)
 {
-#ifdef _DEBUG
-	ISceneManager::setDebugName("CSceneManager ISceneManager");
-	ISceneNode::setDebugName("CSceneManager ISceneNode");
-#endif
-
 	// root node's scene manager
 	SceneManager = this;
 
@@ -312,7 +307,7 @@ const core::aabbox3d<f32> &CSceneManager::getBoundingBox() const
 {
 	_IRR_DEBUG_BREAK_IF(true) // Bounding Box of Scene Manager should never be used.
 
-	static const core::aabbox3d<f32> dummy;
+	static const core::aabbox3d<f32> dummy{{0.0f, 0.0f, 0.0f}};
 	return dummy;
 }
 

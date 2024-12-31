@@ -50,8 +50,6 @@ Sky::Sky(s32 id, RenderingEngine *rendering_engine, ITextureSource *tsrc, IShade
 	m_seed = (u64)myrand() << 32 | myrand();
 
 	setAutomaticCulling(scene::EAC_OFF);
-	m_box.MaxEdge.set(0, 0, 0);
-	m_box.MinEdge.set(0, 0, 0);
 
 	m_sky_params = SkyboxDefaults::getSkyDefaults();
 	m_sun_params = SkyboxDefaults::getSunDefaults();
@@ -62,7 +60,7 @@ Sky::Sky(s32 id, RenderingEngine *rendering_engine, ITextureSource *tsrc, IShade
 
 	m_materials[0] = baseMaterial();
 	m_materials[0].MaterialType =
-			ssrc->getShaderInfo(ssrc->getShader("stars_shader", TILE_MATERIAL_ALPHA)).material;
+			ssrc->getShaderInfo(ssrc->getShaderRaw("stars_shader", true)).material;
 
 	m_materials[1] = baseMaterial();
 	m_materials[1].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;

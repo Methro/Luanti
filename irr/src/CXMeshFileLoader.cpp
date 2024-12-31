@@ -32,11 +32,7 @@ namespace scene
 CXMeshFileLoader::CXMeshFileLoader(scene::ISceneManager *smgr) :
 		AnimatedMesh(0), Buffer(0), P(0), End(0), BinaryNumCount(0), Line(0), ErrorState(false),
 		CurFrame(0), MajorVersion(0), MinorVersion(0), BinaryFormat(false), FloatSize(0)
-{
-#ifdef _DEBUG
-	setDebugName("CXMeshFileLoader");
-#endif
-}
+{}
 
 //! returns true if the file maybe is able to be loaded by this class
 //! based on the file extension (e.g. ".bsp")
@@ -60,8 +56,9 @@ IAnimatedMesh *CXMeshFileLoader::createMesh(io::IReadFile *file)
 
 	AnimatedMesh = new SkinnedMeshBuilder();
 
+	SkinnedMesh *res = nullptr;
 	if (load(file)) {
-		AnimatedMesh->finalize();
+		res = AnimatedMesh->finalize();
 	} else {
 		AnimatedMesh->drop();
 		AnimatedMesh = 0;
@@ -93,7 +90,7 @@ IAnimatedMesh *CXMeshFileLoader::createMesh(io::IReadFile *file)
 		delete Meshes[i];
 	Meshes.clear();
 
-	return AnimatedMesh->finalize();
+	return res;
 }
 
 bool CXMeshFileLoader::load(io::IReadFile *file)
@@ -966,15 +963,16 @@ bool CXMeshFileLoader::parseDataObjectSkinWeights(SXMesh &mesh)
 	u32 i;
 
 	const u32 jointStart = joint->Weights.size();
-	joint->Weights.resize(jointStart + nWeights);
+	joint->Weights.reserve(jointStart + nWeights);
 
 	mesh.WeightJoint.reallocate(mesh.WeightJoint.size() + nWeights);
 	mesh.WeightNum.reallocate(mesh.WeightNum.size() + nWeights);
 
 	for (i = 0; i < nWeights; ++i) {
 		mesh.WeightJoint.push_back(*n);
-		mesh.WeightNum.push_back(joint->Weights.size());
+		mesh.WeightNum.push_back(joint->Weights.size()); // id of weight
 
+		// Note: This adds a weight to joint->Weights
 		SkinnedMesh::SWeight *weight = AnimatedMesh->addWeight(joint);
 
 		weight->buffer_id = 0;
