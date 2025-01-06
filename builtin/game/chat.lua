@@ -1359,35 +1359,35 @@ core.register_chatcommand("kill", {
 
 -- Función para mostrar la posición de un jugador conectado
 local function locate_player(playername)
-    local player_names = core.get_player_names() -- Obtiene todos los nombres de jugadores conectados
+	local player_names = core.get_player_names() -- Obtiene todos los nombres de jugadores conectados
 
-    for _, name in ipairs(player_names) do
-        if name == playername then
-            local player_pos = core.get_player_by_name(name):get_pos() -- Obtiene la posición del jugador específico
-            if player_pos then
-                local message = "Ubicación de: " .. core.colorize("#489be6", playername) .. 
-                                core.colorize("#33d018", core.pos_to_string(player_pos, 1))
-                core.display_chat_message(message)
-                return
-            end
-        end
-    end
+	for _, name in ipairs(player_names) do
+		if name == playername then
+			local player_pos = core.get_player_by_name(name):get_pos() -- Obtiene la posición del jugador específico
+			if player_pos then
+				local message = "Ubicación de: " .. core.colorize("#489be6", playername) .. 
+								core.colorize("#33d018", core.pos_to_string(player_pos, 1))
+				core.display_chat_message(message)
+				return
+			end
+		end
+	end
 
-    core.display_chat_message(core.colorize("#ff0000", "Jugador no encontrado o desconectado."))
+	core.display_chat_message(core.colorize("#ff0000", "Jugador no encontrado o desconectado."))
 end
 
 -- Comando para localizar a un jugador
 core.register_chatcommand("locate", {
-    params = "<player_name>",
-    description = "Muestra la ubicación del jugador conectado.",
-    privs = {interact=true}, -- Cambiado a "interact"
-    func = function(name, param)
-        if param and param ~= "" then
-            locate_player(param:trim())
-            return true
-        else
-            return false, core.colorize("orange", "Por favor proporciona un nombre de jugador.")
-        end
-    end,
+	params = "<player_name>",
+	description = "Muestra la ubicación del jugador conectado.",
+	privs = {interact=true},
+	func = function(name, param)
+		if param and param ~= "" then
+			locate_player(param:trim())
+			return true
+		else
+			return false, core.colorize("orange", "Por favor proporciona un nombre de jugador.")
+		end
+	end,
 })
 
