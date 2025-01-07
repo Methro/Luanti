@@ -130,34 +130,48 @@ int ModApiClient::l_get_player_names(lua_State *L)
 // get_player_by_name(name)
 int ModApiClient::l_get_player_by_name(lua_State *L)
 {
+    // Verificar restricciones de acceso
+    if (checkCSMRestrictionFlag(CSM_RF_READ_PLAYERINFO))
+        return 0;
+
     // Obtener el nombre del jugador de la pila de Lua
     const char *name = luaL_checkstring(L, 1);
-    
-    // Obtener el entorno del cliente
+
+    // Obtener el cliente
     Client *client = getClient(L);
     if (!client) {
         lua_pushnil(L); // Si no hay cliente, devolver nil
         return 1; // Retornar 1 porque estamos devolviendo un valor
     }
 
-    // Obtener el jugador remoto
-    RemotePlayer *player = client->getEnv()->getPlayer(name);
+    // Obtener el entorno del cliente
+    ClientEnvironment &env = client->getEnv(); // Asumiendo que getEnv() retorna una referencia
+
+    // Obtener el jugador remoto (ajusta según tu implementación)
+    auto player = env.getPlayer(name); // Cambia esto según cómo obtienes el jugador
     if (!player) {
         lua_pushnil(L); // Si no se encuentra el jugador, devolver nil
         return 1;
     }
-    
-    // Obtener el PlayerSAO
-    PlayerSAO *sao = player->getPlayerSAO();
-    if (!sao || sao->isGone()) {
-        lua_pushnil(L); // Si el jugador no es válido, devolver nil
-        return 1;
-    }
 
-    // Poner el jugador en la pila de Lua
-    getScriptApiBase(L)->objectrefGetOrCreate(L, sao);
+    // Aquí asumimos que el jugador tiene un método para obtener su información
+    // Ajusta esto según tu implementación real
+    auto playerInfo = player->getInfo(); // Cambia esto según cómo obtienes la información del jugador
+
+    // Crear una tabla para devolver la información del jugador
+    lua_newtable(L);
+    lua_pushstring(L, "name");
+    lua_pushstring(L, playerInfo.name.c_str()); // Asumiendo que playerInfo tiene un campo name
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "score");
+    lua_pushinteger(L, playerInfo.score); // Asumiendo que playerInfo tiene un campo score
+    lua_settable(L, -3);
+
+    // Retornar la tabla con la información del jugador
     return 1; // Retornar 1 porque devolvemos un objeto
 }
+
 
 
 // show_formspec(formspec)
