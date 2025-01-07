@@ -127,6 +127,39 @@ int ModApiClient::l_get_player_names(lua_State *L)
 	return 1;
 }
 
+// get_player_by_name(name)
+int ModApiClient::l_get_player_by_name(lua_State *L)
+{
+    // Obtener el nombre del jugador de la pila de Lua
+    const char *name = luaL_checkstring(L, 1);
+    
+    // Obtener el entorno del cliente
+    Client *client = getClient(L);
+    if (!client) {
+        lua_pushnil(L); // Si no hay cliente, devolver nil
+        return 1; // Retornar 1 porque estamos devolviendo un valor
+    }
+
+    // Obtener el jugador remoto
+    RemotePlayer *player = client->getEnv()->getPlayer(name);
+    if (!player) {
+        lua_pushnil(L); // Si no se encuentra el jugador, devolver nil
+        return 1;
+    }
+    
+    // Obtener el PlayerSAO
+    PlayerSAO *sao = player->getPlayerSAO();
+    if (!sao || sao->isGone()) {
+        lua_pushnil(L); // Si el jugador no es válido, devolver nil
+        return 1;
+    }
+
+    // Poner el jugador en la pila de Lua
+    getScriptApiBase(L)->objectrefGetOrCreate(L, sao);
+    return 1; // Retornar 1 porque devolvemos un objeto
+}
+
+
 // show_formspec(formspec)
 int ModApiClient::l_show_formspec(lua_State *L)
 {
@@ -325,6 +358,7 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(send_chat_message);
 	API_FCT(clear_out_chat_queue);
 	API_FCT(get_player_names);
+	API_FCT(get_player_by_name);
 	API_FCT(show_formspec);
 	API_FCT(gettext);
 	API_FCT(get_node_or_nil);
