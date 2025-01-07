@@ -127,49 +127,46 @@ int ModApiClient::l_get_player_names(lua_State *L)
 	return 1;
 }
 
-// get_player_by_name(name)
+// get_player_by_name()
 int ModApiClient::l_get_player_by_name(lua_State *L)
 {
-    // Verificar restricciones de acceso
     if (checkCSMRestrictionFlag(CSM_RF_READ_PLAYERINFO))
         return 0;
 
-    // Obtener el nombre del jugador de la pila de Lua
-    const char *name = luaL_checkstring(L, 1);
-
-    // Obtener el cliente
     Client *client = getClient(L);
     if (!client) {
-        lua_pushnil(L); // Si no hay cliente, devolver nil
-        return 1; // Retornar 1 porque estamos devolviendo un valor
-    }
-
-    // Obtener el entorno del cliente
-    ClientEnvironment &env = client->getEnv(); // Asumiendo que getEnv() retorna una referencia
-
-    // Obtener el jugador remoto (ajusta según tu implementación)
-    auto player = env.getPlayer(name); // Cambia esto según cómo obtienes el jugador
-    if (!player) {
-        lua_pushnil(L); // Si no se encuentra el jugador, devolver nil
+        lua_pushnil(L);
         return 1;
     }
 
-    // Aquí asumimos que el jugador tiene un método para obtener su información
-    // Ajusta esto según tu implementación real
-    auto playerInfo = player->getInfo(); // Cambia esto según cómo obtienes la información del jugador
+    ClientEnvironment &env = client->getEnv();
+    
+    // Supongamos que tienes un método para obtener todos los objetos activos
+    std::vector<ClientActiveObject*> activeObjects = env.getActiveObjects(); // Cambia esto según tu implementación
 
-    // Crear una tabla para devolver la información del jugador
-    lua_newtable(L);
-    lua_pushstring(L, "name");
-    lua_pushstring(L, playerInfo.name.c_str()); // Asumiendo que playerInfo tiene un campo name
-    lua_settable(L, -3);
+    lua_newtable(L); // Crear una tabla para los jugadores
+    int playerIndex = 1;
 
-    lua_pushstring(L, "score");
-    lua_pushinteger(L, playerInfo.score); // Asumiendo que playerInfo tiene un campo score
-    lua_settable(L, -3);
+    for (auto &object : activeObjects) {
+        // Filtrar solo los objetos que son jugadores
+        if (object->isPlayer()) { // Cambia esto según cómo determines si es un jugador
+            auto playerInfo = object->getInfo(); // Cambia esto según cómo obtienes la información
 
-    // Retornar la tabla con la información del jugador
-    return 1; // Retornar 1 porque devolvemos un objeto
+            lua_pushinteger(L, playerIndex++);
+            lua_newtable(L);
+            lua_pushstring(L, "name");
+            lua_pushstring(L, playerInfo.name.c_str());
+            lua_settable(L, -3);
+
+            lua_pushstring(L, "score");
+            lua_pushinteger(L, playerInfo.score);
+            lua_settable(L, -3);
+
+            lua_settable(L, -3); // Agregar la tabla del jugador a la tabla de jugadores
+        }
+    }
+
+    return 1; // Retornar la tabla con la información de todos los jugadores
 }
 
 
