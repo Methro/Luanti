@@ -127,50 +127,6 @@ int ModApiClient::l_get_player_names(lua_State *L)
 	return 1;
 }
 
-// get_player_by_name()
-int ModApiClient::l_get_player_by_name(lua_State *L)
-{
-    if (checkCSMRestrictionFlag(CSM_RF_READ_PLAYERINFO))
-        return 0;
-
-    Client *client = getClient(L);
-    if (!client) {
-        lua_pushnil(L);
-        return 1;
-    }
-
-    ClientEnvironment &env = client->getEnv();
-    
-    // Supongamos que tienes un método para obtener todos los objetos activos
-    std::vector<ClientActiveObject*> activeObjects = env.getActiveObjects(); // Cambia esto según tu implementación
-
-    lua_newtable(L); // Crear una tabla para los jugadores
-    int playerIndex = 1;
-
-    for (auto &object : activeObjects) {
-        // Filtrar solo los objetos que son jugadores
-        if (object->isPlayer()) { // Cambia esto según cómo determines si es un jugador
-            auto playerInfo = object->getInfo(); // Cambia esto según cómo obtienes la información
-
-            lua_pushinteger(L, playerIndex++);
-            lua_newtable(L);
-            lua_pushstring(L, "name");
-            lua_pushstring(L, playerInfo.name.c_str());
-            lua_settable(L, -3);
-
-            lua_pushstring(L, "score");
-            lua_pushinteger(L, playerInfo.score);
-            lua_settable(L, -3);
-
-            lua_settable(L, -3); // Agregar la tabla del jugador a la tabla de jugadores
-        }
-    }
-
-    return 1; // Retornar la tabla con la información de todos los jugadores
-}
-
-
-
 // show_formspec(formspec)
 int ModApiClient::l_show_formspec(lua_State *L)
 {
@@ -369,7 +325,6 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(send_chat_message);
 	API_FCT(clear_out_chat_queue);
 	API_FCT(get_player_names);
-	API_FCT(get_player_by_name);
 	API_FCT(show_formspec);
 	API_FCT(gettext);
 	API_FCT(get_node_or_nil);

@@ -1356,33 +1356,3 @@ core.register_chatcommand("kill", {
 		return handle_kill_command(name, param == "" and name or param)
 	end,
 })
-
--- Función para mostrar la posición de un jugador conectado
-local function locate_player(playername)
-	local player = core.get_player_by_name(playername) -- Obtiene el objeto del jugador
-	if player then
-		local player_pos = player:get_pos() -- Obtiene la posición del jugador específico
-		if player_pos then
-			local message = "Ubicación de: " .. core.colorize("#489be6", playername) ..
-							core.colorize("#33d018", core.pos_to_string(player_pos, 1))
-			core.display_chat_message(message)
-		end
-	else
-		core.display_chat_message(core.colorize("#ff0000", "Jugador no encontrado o desconectado."))
-	end
-end
-
--- Comando para localizar a un jugador
-core.register_chatcommand("locate", {
-	params = "<player_name>",
-	description = "Muestra la ubicación del jugador conectado.",
-	privs = {interact=true}, -- Cambiado a "interact"
-	func = function(name, param)
-		if param and param ~= "" then
-			locate_player(param:trim())
-			return true
-		else
-			return false, core.colorize("orange", "Por favor proporciona un nombre de jugador.")
-		end
-	end,
-})
