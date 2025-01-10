@@ -647,9 +647,6 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offs
 		Convert MeshCollector to SMesh
 	*/
 
-	const bool desync_animations = g_settings->getBool(
-		"desynchronize_mapblock_texture_animation");
-
 	m_bounding_radius = std::sqrt(collector.m_bounding_radius_sq);
 
 	for (int layer = 0; layer < MAX_TILE_LAYERS; layer++) {
@@ -686,16 +683,7 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offs
 				auto &info = m_animation_info[{layer, i}];
 				info.tile = p.layer;
 				info.frame = 0;
-				if (desync_animations) {
-					// Get starting position from noise
-					info.frame_offset =
-							100000 * (2.0 + noise3d(
-							data->m_blockpos.X, data->m_blockpos.Y,
-							data->m_blockpos.Z, 0));
-				} else {
-					// Play all synchronized
-					info.frame_offset = 0;
-				}
+				info.frame_offset = 0;
 				// Replace tile texture with the first animation frame
 				p.layer.texture = (*p.layer.frames)[0].texture;
 			}
@@ -709,6 +697,16 @@ MapBlockMesh::MapBlockMesh(Client *client, MeshMakeData *data, v3s16 camera_offs
 				tex.MinFilter = video::ETMINF_NEAREST_MIPMAP_NEAREST;
 				tex.MagFilter = video::ETMAGF_NEAREST;
 			});
+			/*
+			 * The second layer is for overlays, but uses the same vertex positions
+			 * as the first, which quickly leads to z-fighting.
+			 * To fix this we can offset the polygons in the direction of the camera.
+			 * This only affects the depth buffer and leads to no visual gaps in geometry.
+			 */
+			if (layer == 1) {
+				material.PolygonOffsetSlopeScale = -1;
+				material.PolygonOffsetDepthBias = -1;
+			}
 
 			{
 				material.MaterialType = m_shdrsrc->getShaderInfo(
