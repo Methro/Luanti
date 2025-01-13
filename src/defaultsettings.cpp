@@ -269,12 +269,13 @@ void set_default_settings()
 	settings->setDefault("cinematic", "false");
 	settings->setDefault("camera_smoothing", "0.36");
 	settings->setDefault("cinematic_camera_smoothing", "0.7");
+	settings->setDefault("enable_clouds", "false");
 	settings->setDefault("view_bobbing_amount", "1.0");
 	settings->setDefault("fall_bobbing_amount", "0.03");
 	settings->setDefault("disable_view_bobbing", "false");
 	settings->setDefault("enable_3d_clouds", "false");
 	settings->setDefault("soft_clouds", "false");
-	settings->setDefault("cloud_radius", "12");
+	settings->setDefault("cloud_radius", "0");
 	settings->setDefault("menu_clouds", "false");
 	settings->setDefault("translucent_liquids", "true");
 	settings->setDefault("console_height", "0.6");

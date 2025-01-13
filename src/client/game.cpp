@@ -742,6 +742,7 @@ private:
 	 *       a later release.
 	 */
 	bool m_cache_doubletap_jump;
+	bool m_cache_enable_clouds;
 	bool m_cache_enable_joysticks;
 	bool m_cache_enable_fog;
 	bool m_cache_enable_noclip;
@@ -785,6 +786,8 @@ Game::Game() :
 	g_settings->registerChangedCallback("chat_log_level",
 		&settingChangedCallback, this);
 	g_settings->registerChangedCallback("doubletap_jump",
+		&settingChangedCallback, this);
+	g_settings->registerChangedCallback("enable_clouds",
 		&settingChangedCallback, this);
 	g_settings->registerChangedCallback("enable_joysticks",
 		&settingChangedCallback, this);
@@ -1289,7 +1292,8 @@ bool Game::createClient(const GameStartData &start_data)
 
 	/* Clouds
 	 */
-	clouds = make_irr<Clouds>(smgr, shader_src, -1, myrand());
+	if (m_cache_enable_clouds)
+		clouds = make_irr<Clouds>(smgr, shader_src, -1, rand());
 
 	/* Skybox
 	 */
@@ -2841,6 +2845,8 @@ void Game::handleClientEvent_OverrideDayNigthRatio(ClientEvent *event,
 
 void Game::handleClientEvent_CloudParams(ClientEvent *event, CameraOrientation *cam)
 {
+	if (!clouds)
+		return;
 	clouds->setDensity(event->cloud_params.density);
 	clouds->setColorBright(video::SColor(event->cloud_params.color_bright));
 	clouds->setColorAmbient(video::SColor(event->cloud_params.color_ambient));
@@ -2962,7 +2968,8 @@ void Game::updateCamera(f32 dtime)
 			client->updateCameraOffset(camera_offset);
 			client->getEnv().updateCameraOffset(camera_offset);
 
-			clouds->updateCameraOffset(camera_offset);
+			if (clouds)
+				clouds->updateCameraOffset(camera_offset);
 		}
 	}
 }
@@ -3799,7 +3806,9 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	/*
 		Update clouds
 	*/
-	updateClouds(dtime);
+	
+	if (clouds)
+		updateClouds(dtime);
 
 	/*
 		Update particles
@@ -4061,6 +4070,7 @@ void Game::readSettings()
 	m_chat_log_buf.setLogLevel(chat_log_level);
 
 	m_cache_doubletap_jump               = g_settings->getBool("doubletap_jump");
+	m_cache_enable_clouds                = g_settings->getBool("enable_clouds");
 	m_cache_enable_joysticks             = g_settings->getBool("enable_joysticks");
 	m_cache_enable_fog                   = g_settings->getBool("enable_fog");
 	m_cache_mouse_sensitivity            = g_settings->getFloat("mouse_sensitivity", 0.001f, 10.0f);
