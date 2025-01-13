@@ -8,15 +8,19 @@
 #include "map.h"
 #include "nodedef.h"
 #include "gamedef.h"
-#ifndef SERVER
+#if CHECK_CLIENT_BUILD()
 #include "client/clientenvironment.h"
+#include "client/localplayer.h"
 #endif
 #include "serverenvironment.h"
+#include "server/serveractiveobject.h"
 #include "util/timetaker.h"
 #include "profiler.h"
 
-// float error is 10 - 9.96875 = 0.03125
-//#define COLL_ZERO 0.032 // broken unit tests
+#ifdef __FAST_MATH__
+#warning "-ffast-math is known to cause bugs in collision code, do not use!"
+#endif
+
 #define COLL_ZERO 0
 
 
