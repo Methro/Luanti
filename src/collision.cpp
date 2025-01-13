@@ -12,7 +12,6 @@
 #include "client/clientenvironment.h"
 #endif
 #include "serverenvironment.h"
-#include "serverobject.h"
 #include "util/timetaker.h"
 #include "profiler.h"
 
