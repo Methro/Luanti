@@ -21,6 +21,8 @@
 #warning "-ffast-math is known to cause bugs in collision code, do not use!"
 #endif
 
+bool g_collision_problems_encountered = false;
+
 struct NearbyCollisionInfo {
 	// node
 	NearbyCollisionInfo(bool is_ul, int bouncy, v3s16 pos, const aabb3f &box) :
