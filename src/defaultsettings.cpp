@@ -300,14 +300,14 @@ void set_default_settings()
 	settings->setDefault("show_nametag_backgrounds", "true");
 	settings->setDefault("show_block_bounds_radius_near", "4");
 	settings->setDefault("transparency_sorting_group_by_buffers", "true");
-	settings->setDefault("transparency_sorting_distance", "16");
+	settings->setDefault("transparency_sorting_distance", "0");
 
 	settings->setDefault("enable_minimap", "true");
 	settings->setDefault("minimap_shape_round", "true");
 	settings->setDefault("minimap_double_scan_height", "true");
 
 	// Effects
-	settings->setDefault("enable_post_processing", "true");
+	settings->setDefault("enable_post_processing", "false");
 	settings->setDefault("post_processing_texture_bits", "10");
 	settings->setDefault("directional_colored_fog", "true");
 	settings->setDefault("inventory_items_animations", "false");

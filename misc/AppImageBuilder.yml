@@ -58,3 +58,14 @@ script: |
     cp AppDir/usr/share/icons/hicolor/128x128/apps/luanti.png AppDir/usr/share/luanti/misc/luanti-xorg-icon-128.png
     # Validation issues
     sed -i '/PrefersNonDefaultGPU/d' AppDir/usr/share/applications/net.minetest.minetest.desktop
+
+    # Crear un lanzador para establecer vblank_mode=0
+    echo '#!/bin/bash' > AppDir/usr/bin/luanti-launcher
+    echo 'vblank_mode=0 /usr/bin/luanti "$@"' >> AppDir/usr/bin/luanti-launcher
+    chmod +x AppDir/usr/bin/luanti-launcher
+
+    # Actualizar el archivo .desktop para usar el lanzador
+    sed -i 's|Exec=usr/bin/luanti|Exec=usr/bin/luanti-launcher|' AppDir/usr/share/applications/net.minetest.minetest.desktop
+
+    # Validation issues
+    sed -i '/PrefersNonDefaultGPU/d' AppDir/usr/share/applications/net.minetest.minetest.desktop
