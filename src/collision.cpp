@@ -22,20 +22,33 @@
 #endif
 
 struct NearbyCollisionInfo {
-    NearbyCollisionInfo(bool is_ul, bool is_obj, int bouncy,
-                        const v3s16 &pos, const aabb3f &box) :
-        is_unloaded(is_ul),
-        is_object(is_obj),
-        bouncy(bouncy),
-        position(pos),
-        box(box)
-    {}
-    bool is_unloaded;
-    bool is_step_up = false;
-    bool is_object;
-    int bouncy;
-    v3s16 position;
-    aabb3f box;
+	// node
+	NearbyCollisionInfo(bool is_ul, int bouncy, v3s16 pos, const aabb3f &box) :
+		obj(nullptr),
+		box(box),
+		position(pos),
+		bouncy(bouncy),
+		is_unloaded(is_ul),
+		is_step_up(false)
+	{}
+
+	// object
+	NearbyCollisionInfo(ActiveObject *obj, int bouncy, const aabb3f &box) :
+		obj(obj),
+		box(box),
+		bouncy(bouncy),
+		is_unloaded(false),
+		is_step_up(false)
+	{}
+
+	inline bool isObject() const { return obj != nullptr; }
+
+	ActiveObject *obj;
+	aabb3f box;
+	v3s16 position;
+	u8 bouncy;
+	// bitfield to save space
+	bool is_unloaded:1, is_step_up:1;
 };
 
 // Helper function:
