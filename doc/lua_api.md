@@ -194,7 +194,8 @@ Mod directory structure
     │   │   │   └── another_subfolder
     │   │   └── bar_subfolder
     │   ├── sounds
-    │   ├── media
+    │   ├── fonts
+    │   ├── media
     │   ├── locale
     │   └── <custom data>
     └── another
@@ -265,7 +266,7 @@ The main Lua script. Running this script should register everything it
 wants to register. Subsequent execution depends on Luanti calling the
 registered callbacks.
 
-### `textures`, `sounds`, `media`, `models`, `locale`
+### `textures`, `sounds`, `media`, `models`, `locale`, `fonts`
 
 Media files (textures, sounds, whatever) that will be transferred to the
 client and will be available for use by the mod and translation files for
@@ -278,6 +279,7 @@ Accepted formats are:
     images: .png, .jpg, .tga
     sounds: .ogg vorbis
     models: .x, .b3d, .obj, (since version 5.10:) .gltf, .glb
+    fonts: .ttf, .woff (both since version 5.11, see notes below)
 
 Other formats won't be sent to the client (e.g. you can store .blend files
 in a folder for convenience, without the risk that such files are transferred)
@@ -341,6 +343,28 @@ The backwards compatibility guarantee does not extend to ignoring unsupported fe
 For example, if your model used an emissive material,
 you should expect that a future version of Luanti may respect this,
 and thus cause your model to render differently there.
+
+#### Custom fonts
+
+You can supply custom fonts in TrueType Font (`.ttf`) or Web Open Font Format (`.woff`) format.
+The former is supported primarily for convenience. The latter is preferred due to its compression.
+
+In the future, having multiple custom fonts and the ability to switch between them is planned,
+but for now this feature is limited to the ability to override Luanti's default fonts via mods.
+It is recommended that this only be used by game mods to set a look and feel.
+
+The stems (file names without extension) are self-explanatory:
+
+* Regular variants:
+  * `regular`
+  * `bold`
+  * `italic`
+  * `bold_italic`
+* Monospaced variants:
+  * `mono`
+  * `mono_bold`
+  * `mono_italic`
+  * `mono_bold_italic`
 
 Naming conventions
 ------------------
@@ -5044,7 +5068,7 @@ inside the VoxelManip.
   can use `core.emerge_area` to make sure that the area you want to
   read/write is already generated.
 
-* Other mods, or the core itself, could possibly modify the area of the map
+* Other mods, or the engine itself, could possibly modify the area of the map
   currently loaded into a VoxelManip object. With the exception of Mapgen
   VoxelManips (see above section), the internal buffers are not updated. For
   this reason, it is strongly encouraged to complete the usage of a particular
@@ -5059,9 +5083,11 @@ inside the VoxelManip.
 Methods
 -------
 
-* `read_from_map(p1, p2)`:  Loads a chunk of map into the VoxelManip object
+* `read_from_map(p1, p2)`: Loads a chunk of map into the VoxelManip object
   containing the region formed by `p1` and `p2`.
     * returns actual emerged `pmin`, actual emerged `pmax`
+    * Note that calling this multiple times will *add* to the area loaded in the
+      VoxelManip, and not reset it.
 * `write_to_map([light])`: Writes the data loaded from the `VoxelManip` back to
   the map.
     * **important**: data must be set using `VoxelManip:set_data()` before
@@ -5120,8 +5146,8 @@ Methods
       generated mapchunk above are propagated down into the mapchunk, defaults
       to `true` if left out.
 * `update_liquids()`: Update liquid flow
-* `was_modified()`: Returns `true` if the data in the voxel manipulator has been modified
-   since it was last read from the map. This means you have to call `get_data` again.
+* `was_modified()`: Returns `true` if the data in the VoxelManip has been modified
+   since it was last read from the map. This means you have to call `get_data()` again.
    This only applies to a `VoxelManip` object from `core.get_mapgen_object`,
    where the engine will keep the map and the VM in sync automatically.
    * Note: this doesn't do what you think it does and is subject to removal. Don't use it!

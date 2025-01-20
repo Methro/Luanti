@@ -103,7 +103,7 @@ void set_default_settings()
 	settings->setDefault("sound_extensions_blacklist", "");
 	settings->setDefault("mesh_generation_interval", "0");
 	settings->setDefault("mesh_generation_threads", "0");
-	settings->setDefault("mesh_buffer_min_vertices", "100");
+	settings->setDefault("mesh_buffer_min_vertices", "300");
 	settings->setDefault("free_move", "false");
 	settings->setDefault("pitch_move", "false");
 	settings->setDefault("fast_move", "false");
@@ -342,7 +342,7 @@ void set_default_settings()
 	settings->setDefault("shadow_map_color", "false");
 	settings->setDefault("shadow_filters", "1");
 	settings->setDefault("shadow_poisson_filter", "true");
-	settings->setDefault("shadow_update_frames", "8");
+	settings->setDefault("shadow_update_frames", "16");
 	settings->setDefault("shadow_soft_radius", "5.0");
 	settings->setDefault("shadow_sky_body_orbit_tilt", "0.0");
 

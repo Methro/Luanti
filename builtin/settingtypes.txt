@@ -1855,7 +1855,7 @@ mesh_generation_threads (Mapblock mesh generation threads) int 0 0 8
 
 #    All mesh buffers with less than this number of vertices will be merged
 #    during map rendering. This improves rendering performance.
-mesh_buffer_min_vertices (Minimum vertex count for mesh buffers) int 100 0 1000
+mesh_buffer_min_vertices (Minimum vertex count for mesh buffers) int 300 0 1000
 
 #    True = 256
 #    False = 128
@@ -1913,7 +1913,7 @@ shadow_poisson_filter (Poisson filtering) bool true
 #    Minimum value: 1; maximum value: 16
 #
 #    Requires: enable_dynamic_shadows, opengl
-shadow_update_frames (Map shadows update frames) int 8 1 16
+shadow_update_frames (Map shadows update frames) int 16 1 32
 
 #    Set to true to render debugging breakdown of the bloom effect.
 #    In debug mode, the screen is split into 4 quadrants:
