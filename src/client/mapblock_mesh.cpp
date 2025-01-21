@@ -75,10 +75,15 @@ void MeshMakeData::fillSingleNode(MapNode data, MapNode padding)
 	m_vmanip.setNodeNoEmerge({0, 0, 0}, data);
 }
 
-void MeshMakeData::setCrack(int crack_level, v3s16 crack_pos)
+void MeshMakeData::setSmoothLighting(bool smooth_lighting)
 {
 
 	m_smooth_lighting = smooth_lighting && !g_settings->getBool("fullbright");
+}
+
+void MeshMakeData::setCrack(int crack_level, v3s16 crack_pos)
+{
+
 	if (crack_level >= 0)
 		m_crack_pos_relative = crack_pos - m_blockpos*MAP_BLOCKSIZE;
 }
