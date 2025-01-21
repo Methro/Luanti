@@ -50,8 +50,7 @@ struct MeshMakeData
 	v3s16 m_crack_pos_relative = v3s16(-1337,-1337,-1337);
 	bool m_generate_minimap = false;
 	bool m_smooth_lighting = false;
-	bool m_enable_water_reflections = false;
-
+	bool m_enable_water_reflections = false; 
 	const NodeDefManager *m_nodedef;
 
 	MeshMakeData(const NodeDefManager *ndef, u16 side_lingth, MeshGrid mesh_grid);
@@ -71,6 +70,11 @@ struct MeshMakeData
 		Set the (node) position of a crack
 	*/
 	void setCrack(int crack_level, v3s16 crack_pos);
+	
+	/*
+		Enable or disable smooth lighting
+	*/
+	void setSmoothLighting(bool smooth_lighting);
 };
 
 // represents a triangle as indexes into the vertex buffer in SMeshBuffer
