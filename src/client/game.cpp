@@ -564,7 +564,6 @@ protected:
 	void updatePauseState();
 	void step(f32 dtime);
 	void processClientEvents(CameraOrientation *cam);
-	void updateCameraOffset();
 	void updateCamera(f32 dtime);
 	void updateSound(f32 dtime);
 	void processPlayerInteraction(f32 dtime, bool show_hud);
@@ -651,8 +650,7 @@ private:
 	void handleClientEvent_PlayerForceMove(ClientEvent *event, CameraOrientation *cam);
 	void handleClientEvent_DeathscreenLegacy(ClientEvent *event, CameraOrientation *cam);
 	void handleClientEvent_ShowFormSpec(ClientEvent *event, CameraOrientation *cam);
-	void handleClientEvent_ShowCSMFormSpec(ClientEvent *event, CameraOrientation *cam);
-	void handleClientEvent_ShowPauseMenuFormSpec(ClientEvent *event, CameraOrientation *cam);
+	void handleClientEvent_ShowLocalFormSpec(ClientEvent *event, CameraOrientation *cam);
 	void handleClientEvent_HandleParticleEvent(ClientEvent *event,
 		CameraOrientation *cam);
 	void handleClientEvent_HudAdd(ClientEvent *event, CameraOrientation *cam);
@@ -746,7 +744,6 @@ private:
 	bool m_cache_doubletap_jump;
 	bool m_cache_enable_clouds;
 	bool m_cache_enable_joysticks;
-	bool m_cache_enable_particles;
 	bool m_cache_enable_fog;
 	bool m_cache_enable_noclip;
 	bool m_cache_enable_free_move;
@@ -794,8 +791,6 @@ Game::Game() :
 		&settingChangedCallback, this);
 	g_settings->registerChangedCallback("enable_joysticks",
 		&settingChangedCallback, this);
-	g_settings->registerChangedCallback("enable_particles",
-		&settingChangedCallback, this);	
 	g_settings->registerChangedCallback("enable_fog",
 		&settingChangedCallback, this);
 	g_settings->registerChangedCallback("mouse_sensitivity",
@@ -998,12 +993,6 @@ void Game::run()
 		m_game_ui->clearInfoText();
 
 		updateProfilers(stats, draw_times, dtime);
-
-		// Update camera offset once before doing anything.
-		// In contrast to other updates the latency of this doesn't matter,
-		// since it's invisible to the user. But it needs to be consistent.
-		updateCameraOffset();
-
 		processUserInput(dtime);
 		// Update camera before player movement to avoid camera lag of one frame
 		updateCameraDirection(&cam_view_target, dtime);
@@ -1021,7 +1010,6 @@ void Game::run()
 
 		processClientEvents(&cam_view_target);
 		updateDebugState();
-		// Update camera here so it is in-sync with CAO position
 		updateCamera(dtime);
 		updateSound(dtime);
 		processPlayerInteraction(dtime, m_game_ui->m_flags.show_hud);
@@ -1817,9 +1805,7 @@ void Game::processUserInput(f32 dtime)
 		m_game_focused = true;
 	}
 
-	if (!guienv->hasFocus(gui_chat_console.get()) && gui_chat_console->isOpen()
-		&& !gui_chat_console->isMyChild(guienv->getFocus()))
-	{
+	if (!guienv->hasFocus(gui_chat_console.get()) && gui_chat_console->isOpen()) {
 		gui_chat_console->closeConsoleAtOnce();
 	}
 
@@ -2558,8 +2544,7 @@ const ClientEventHandler Game::clientEventHandler[CLIENTEVENT_MAX] = {
 	{&Game::handleClientEvent_PlayerForceMove},
 	{&Game::handleClientEvent_DeathscreenLegacy},
 	{&Game::handleClientEvent_ShowFormSpec},
-	{&Game::handleClientEvent_ShowCSMFormSpec},
-	{&Game::handleClientEvent_ShowPauseMenuFormSpec},
+	{&Game::handleClientEvent_ShowLocalFormSpec},
 	{&Game::handleClientEvent_HandleParticleEvent},
 	{&Game::handleClientEvent_HandleParticleEvent},
 	{&Game::handleClientEvent_HandleParticleEvent},
@@ -2629,18 +2614,9 @@ void Game::handleClientEvent_ShowFormSpec(ClientEvent *event, CameraOrientation 
 	delete event->show_formspec.formname;
 }
 
-void Game::handleClientEvent_ShowCSMFormSpec(ClientEvent *event, CameraOrientation *cam)
+void Game::handleClientEvent_ShowLocalFormSpec(ClientEvent *event, CameraOrientation *cam)
 {
-	m_game_formspec.showCSMFormSpec(*event->show_formspec.formspec,
-		*event->show_formspec.formname);
-
-	delete event->show_formspec.formspec;
-	delete event->show_formspec.formname;
-}
-
-void Game::handleClientEvent_ShowPauseMenuFormSpec(ClientEvent *event, CameraOrientation *cam)
-{
-	m_game_formspec.showPauseMenuFormSpec(*event->show_formspec.formspec,
+	m_game_formspec.showLocalFormSpec(*event->show_formspec.formspec,
 		*event->show_formspec.formname);
 
 	delete event->show_formspec.formspec;
@@ -2933,8 +2909,7 @@ void Game::updateChat(f32 dtime)
 
 void Game::updateCamera(f32 dtime)
 {
-	ClientEnvironment &env = client->getEnv();
-	LocalPlayer *player = env.getLocalPlayer();
+	LocalPlayer *player = client->getEnv().getLocalPlayer();
 
 	/*
 		For interaction purposes, get info about the held item
@@ -2950,6 +2925,8 @@ void Game::updateCamera(f32 dtime)
 
 	ToolCapabilities playeritem_toolcap =
 		playeritem.getToolCapabilities(itemdef_manager);
+
+	v3s16 old_camera_offset = camera->getOffset();
 
 	if (wasKeyPressed(KeyType::CAMERA_MODE)) {
 		GenericCAO *playercao = player->getCAO();
@@ -2971,49 +2948,32 @@ void Game::updateCamera(f32 dtime)
 	float full_punch_interval = playeritem_toolcap.full_punch_interval;
 	float tool_reload_ratio = runData.time_from_last_punch / full_punch_interval;
 
-	tool_reload_ratio = std::min(tool_reload_ratio, 1.0f);
+	tool_reload_ratio = MYMIN(tool_reload_ratio, 1.0);
 	camera->update(player, dtime, tool_reload_ratio);
 	camera->step(dtime);
 
-	if (!m_flags.disable_camera_update) {
-		client->getEnv().getClientMap().updateCamera(camera->getPosition(),
-			camera->getDirection(), camera->getFovMax(), camera->getOffset(),
-			player->light_color);
-	}
-}
-
-void Game::updateCameraOffset()
-{
+	f32 camera_fov = camera->getFovMax();
 	v3s16 camera_offset = camera->getOffset();
-	old_camera_offset = camera_offset;
-
-	camera->updateOffset();
-	camera_offset = camera->getOffset();
-	
-	if (clouds) {
-		clouds->updateCameraOffset(camera_offset);
-		}
 
 	m_camera_offset_changed = (camera_offset != old_camera_offset);
 
-    
-	if (!m_camera_offset_changed) {
-		return;
-	}
-
-
 	if (!m_flags.disable_camera_update) {
-		ClientEnvironment &env = client->getEnv();
-		env.getClientMap().updateCamera(
-		camera->getPosition(),
-		camera->getDirection(),
-		camera->getFovMax(),
-		camera_offset,
-		env.getLocalPlayer()->light_color
-		);
-		env.updateCameraOffset(camera_offset);
+		v3f camera_position = camera->getPosition();
+		v3f camera_direction = camera->getDirection();
+
+		client->getEnv().getClientMap().updateCamera(camera_position,
+				camera_direction, camera_fov, camera_offset, player->light_color);
+
+		if (m_camera_offset_changed) {
+			client->updateCameraOffset(camera_offset);
+			client->getEnv().updateCameraOffset(camera_offset);
+
+			if (clouds)
+				clouds->updateCameraOffset(camera_offset);
+		}
 	}
 }
+
 
 void Game::updateSound(f32 dtime)
 {
@@ -3668,10 +3628,8 @@ void Game::handleDigging(const PointedThing &pointed, const v3s16 &nodepos,
 	} else {
 		runData.dig_time_complete = params.time;
 
-	if (m_cache_enable_particles) {
-			client->getParticleManager()->addNodeParticle(client,
-					player, nodepos, n, features);
-		}
+		client->getParticleManager()->addNodeParticle(client,
+				player, nodepos, n, features);
 	}
 
 	if (!runData.digging) {
@@ -3756,10 +3714,8 @@ void Game::handleDigging(const PointedThing &pointed, const v3s16 &nodepos,
 
 		client->interact(INTERACT_DIGGING_COMPLETED, pointed);
 
-		if (m_cache_enable_particles) {
-			client->getParticleManager()->addDiggingParticles(client,
-				player, nodepos, n, features);
-		}
+		client->getParticleManager()->addDiggingParticles(client,
+			player, nodepos, n, features);
 
 		// Send event to trigger sound
 		client->getEventManager()->put(new NodeDugEvent(nodepos, n));
@@ -4116,7 +4072,6 @@ void Game::readSettings()
 	m_cache_doubletap_jump               = g_settings->getBool("doubletap_jump");
 	m_cache_enable_clouds                = g_settings->getBool("enable_clouds");
 	m_cache_enable_joysticks             = g_settings->getBool("enable_joysticks");
-	m_cache_enable_particles             = g_settings->getBool("enable_particles");
 	m_cache_enable_fog                   = g_settings->getBool("enable_fog");
 	m_cache_mouse_sensitivity            = g_settings->getFloat("mouse_sensitivity", 0.001f, 10.0f);
 	m_cache_joystick_frustum_sensitivity = std::max(g_settings->getFloat("joystick_frustum_sensitivity"), 0.001f);
