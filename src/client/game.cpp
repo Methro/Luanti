@@ -2984,30 +2984,34 @@ void Game::updateCamera(f32 dtime)
 
 void Game::updateCameraOffset()
 {
-	ClientEnvironment &env = client->getEnv();
-
-	v3s16 old_camera_offset = camera->getOffset();
+	v3s16 camera_offset = camera->getOffset();
+	old_camera_offset = camera_offset;
 
 	camera->updateOffset();
-
-	v3s16 camera_offset = camera->getOffset();
-
-
-	if (clouds)
+	camera_offset = camera->getOffset();
+	
+	if (clouds) {
 		clouds->updateCameraOffset(camera_offset);
+		}
+
+	m_camera_offset_changed = (camera_offset != old_camera_offset);
+
+    
+	if (!m_camera_offset_changed) {
+		return;
 	}
 
-	m_camera_offset_changed = camera_offset != old_camera_offset;
-	if (!m_camera_offset_changed)
-		return;
 
 	if (!m_flags.disable_camera_update) {
-		env.getClientMap().updateCamera(camera->getPosition(),
-			camera->getDirection(), camera->getFovMax(), camera_offset,
-			env.getLocalPlayer()->light_color);
-
+		ClientEnvironment &env = client->getEnv();
+		env.getClientMap().updateCamera(
+		camera->getPosition(),
+		camera->getDirection(),
+		camera->getFovMax(),
+		camera_offset,
+		env.getLocalPlayer()->light_color
+		);
 		env.updateCameraOffset(camera_offset);
-		clouds->updateCameraOffset(camera_offset);
 	}
 }
 
