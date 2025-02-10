@@ -756,6 +756,7 @@ private:
 	f32  m_repeat_dig_time;
 	f32  m_cache_cam_smoothing;
 
+	bool m_enable_relative_mode = false;
 	bool m_invert_mouse;
 	bool m_enable_hotbar_mouse_wheel;
 	bool m_invert_hotbar_mouse_wheel;
@@ -828,6 +829,8 @@ Game::Game() :
 		&settingChangedCallback, this);
 	g_settings->registerChangedCallback("fullbright",
 		&settingChangedCallback, this);
+	g_settings->registerChangedCallback("touch_use_crosshair",
+			&settingChangedCallback, this);
 
 	readSettings();
 }
@@ -904,7 +907,14 @@ bool Game::startup(bool *kill,
 
 	m_first_loop_after_window_activation = true;
 
-	m_touch_use_crosshair = g_settings->getBool("touch_use_crosshair");
+	// In principle we could always enable relative mouse mode, but it causes weird
+	// bugs on some setups (e.g. #14932), so we enable it only when it's required.
+	// That is: on Wayland or Android, because it does not support mouse repositioning
+#ifdef __ANDROID__
+	m_enable_relative_mode = true;
+#else
+	m_enable_relative_mode = device->isUsingWayland();
+#endif
 
 	g_client_translations->clear();
 
@@ -2358,8 +2368,10 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 	Since Minetest has its own code to synthesize mouse events from touch events,
 	this results in duplicated input. To avoid that, we don't enable relative
 	mouse mode if we're in touchscreen mode. */
-	if (cur_control)
-		cur_control->setRelativeMode(!g_touchcontrols && !isMenuActive());
+	if (cur_control) {
+		cur_control->setRelativeMode(m_enable_relative_mode &&
+			!g_touchcontrols && !isMenuActive());
+	}
 
 	if ((device->isWindowActive() && device->isWindowFocused()
 			&& !isMenuActive()) || input->isRandom()) {
@@ -2997,6 +3009,10 @@ void Game::updateCameraOffset()
 		return;
 
 	if (!m_flags.disable_camera_update) {
+		auto *shadow = RenderingEngine::get_shadow_renderer();
+		if (shadow)
+			shadow->getDirectionalLight().updateCameraOffset(camera);
+
 		env.getClientMap().updateCamera(camera->getPosition(),
 			camera->getDirection(), camera->getFovMax(), camera_offset,
 			env.getLocalPlayer()->light_color);
@@ -3813,8 +3829,8 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		float old_brightness = sky->getBrightness();
 		direct_brightness = client->getEnv().getClientMap()
 				.getBackgroundBrightness(MYMIN(runData.fog_range * 1.2, 60 * BS),
-					daynight_ratio, (int)(old_brightness * 255.5), &sunlight_seen)
-				    / 255.0;
+						daynight_ratio, (int)(old_brightness * 255.5), &sunlight_seen)
+				/ 255.0;
 	}
 
 	float time_of_day_smooth = runData.time_of_day_smooth;
@@ -4000,11 +4016,10 @@ void Game::updateShadows()
 	v3f light = is_day ? sky->getSunDirection() : sky->getMoonDirection();
 
 	v3f sun_pos = light * offset_constant;
-
 	shadow->getDirectionalLight().setDirection(sun_pos);
 	shadow->setTimeOfDay(in_timeofday);
 
-	shadow->getDirectionalLight().update_frustum(camera, client, m_camera_offset_changed);
+	shadow->getDirectionalLight().updateFrustum(camera, client);
 }
 
 void Game::drawScene(ProfilerGraph *graph, RunStats *stats)
@@ -4134,6 +4149,10 @@ void Game::readSettings()
 	m_invert_hotbar_mouse_wheel = g_settings->getBool("invert_hotbar_mouse_wheel");
 
 	m_does_lost_focus_pause_game = g_settings->getBool("pause_on_lost_focus");
+
+	m_touch_use_crosshair = g_settings->getBool("touch_use_crosshair");
+	if (g_touchcontrols)
+		g_touchcontrols->setUseCrosshair(!isTouchCrosshairDisabled());
 }
 
 /****************************************************************************/

@@ -5,10 +5,10 @@ Luanti Lua Modding API Reference
 it's now called `core` due to the renaming of Luanti (formerly Minetest).
 `minetest` will keep existing as an alias, so that old code won't break.
 
-* More information at <http://www.minetest.net/>
-* Developer Wiki: <http://dev.minetest.net/>
+* More information at <http://www.luanti.org/>
+* Developer Wiki: <https://dev.luanti.org/>
 * (Unofficial) Minetest Modding Book by rubenwardy: <https://rubenwardy.com/minetest_modding_book/>
-* Modding tools: <https://github.com/minetest/modtools>
+* Modding tools: <https://github.com/luanti-org/modtools>
 
 Introduction
 ------------
@@ -327,7 +327,7 @@ Many glTF features are not supported *yet*, including:
   * Double-sided materials don't work
 * Alternative means of supplying data
   * Embedded images. You can use `gltfutil.py` from the
-    [modding tools](https://github.com/minetest/modtools) to strip or extract embedded images.
+    [modding tools](https://github.com/luanti-org/modtools) to strip or extract embedded images.
   * References to files via URIs
 
 Textures are supplied solely via the same means as for the other model file formats:
@@ -1483,8 +1483,6 @@ Node drawtypes
 --------------
 
 There are a bunch of different looking node types.
-
-Look for examples in `games/devtest` or `games/minetest_game`.
 
 * `normal`
     * A node-sized cube.
@@ -4370,7 +4368,7 @@ Hello @1, how are you today?=Hallo @1, wie geht es dir heute?
 ```
 
 For old translation files, consider using the script `mod_translation_updater.py`
-in the Luanti [modtools](https://github.com/minetest/modtools) repository to
+in the Luanti [modtools](https://github.com/luanti-org/modtools) repository to
 generate and update translation files automatically from the Lua sources.
 
 Gettext translation file format
@@ -5580,7 +5578,7 @@ Utilities
     * It's possible that multiple Luanti instances are running at the same
       time, which may lead to corruption if you are not careful.
 * `core.is_singleplayer()`
-* `core.features`: Table containing API feature flags
+* `core.features`: Table containing *server-side* API feature flags
 
   ```lua
   {
@@ -5695,6 +5693,7 @@ Utilities
   ```
 
 * `core.has_feature(arg)`: returns `boolean, missing_features`
+    * checks for *server-side* feature availability
     * `arg`: string or table in format `{foo=true, bar=true}`
     * `missing_features`: `{foo=true, bar=true}`
 * `core.get_player_information(player_name)`: Table containing information
@@ -5716,14 +5715,37 @@ Utilities
       min_jitter = 0.01,         -- minimum packet time jitter
       max_jitter = 0.5,          -- maximum packet time jitter
       avg_jitter = 0.03,         -- average packet time jitter
+
+      -- The version information is provided by the client and may be spoofed
+      -- or inconsistent in engine forks. You must not use this for checking
+      -- feature availability of clients. Instead, do use the fields
+      -- `protocol_version` and `formspec_version` where it matters.
+      -- Use `core.protocol_versions` to map Luanti versions to protocol versions.
+      -- This version string is only suitable for analysis purposes.
+      version_string = "0.4.9-git",   -- full version string
+
       -- the following information is available in a debug build only!!!
       -- DO NOT USE IN MODS
-      --ser_vers = 26,             -- serialization version used by client
-      --major = 0,                 -- major version number
-      --minor = 4,                 -- minor version number
-      --patch = 10,                -- patch version number
-      --vers_string = "0.4.9-git", -- full version string
-      --state = "Active"           -- current client state
+      --serialization_version = 26,     -- serialization version used by client
+      --major = 0,                      -- major version number
+      --minor = 4,                      -- minor version number
+      --patch = 10,                     -- patch version number
+      --state = "Active"                -- current client state
+  }
+  ```
+
+* `core.protocol_versions`:
+  * Table mapping Luanti versions to corresponding protocol versions for modder convenience.
+  * For example, to check whether a client has at least the feature set
+    of Luanti 5.8.0 or newer, you could do:
+    `core.get_player_information(player_name).protocol_version >= core.protocol_versions["5.8.0"]`
+  * (available since 5.11)
+
+  ```lua
+  {
+      [version string] = protocol version at time of release
+      -- every major and minor version has an entry
+      -- patch versions only for the first release whose protocol version is not already present in the table
   }
   ```
 
@@ -9238,7 +9260,7 @@ Player properties need to be saved manually.
     -- Deprecated usage of "wielditem" expects 'textures = {itemname}' (see 'visual' above).
 
     colors = {},
-    -- Number of required colors depends on visual
+    -- Currently unused.
 
     use_texture_alpha = false,
     -- Use texture's alpha channel.

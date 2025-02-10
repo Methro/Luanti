@@ -148,7 +148,7 @@ void set_default_settings()
 	settings->setDefault("keymap_minimap", "KEY_KEY_V");
 	settings->setDefault("keymap_console", "KEY_F10");
 
-	// See https://github.com/minetest/minetest/issues/12792
+	// see <https://github.com/luanti-org/luanti/issues/12792>
 	settings->setDefault("keymap_rangeselect", has_touch ? "KEY_KEY_R" : "");
 
 	settings->setDefault("keymap_freemove", "KEY_KEY_K");
@@ -311,6 +311,8 @@ void set_default_settings()
 	// Effects
 	settings->setDefault("enable_post_processing", "false");
 	settings->setDefault("post_processing_texture_bits", "10");
+	settings->setDefault("enable_post_processing", "true");
+	settings->setDefault("post_processing_texture_bits", "16");
 	settings->setDefault("directional_colored_fog", "true");
 	settings->setDefault("inventory_items_animations", "false");
 	settings->setDefault("mip_map", "false");
@@ -408,7 +410,7 @@ void set_default_settings()
 #endif
 
 #if ENABLE_UPDATE_CHECKER
-	settings->setDefault("update_information_url", "https://www.minetest.net/release_info.json");
+	settings->setDefault("update_information_url", "https://www.luanti.org/release_info.json");
 #else
 	settings->setDefault("update_information_url", "");
 #endif
