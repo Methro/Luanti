@@ -42,12 +42,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends gettext wine wine64
           sudo ./util/buildbot/download_toolchain.sh /usr
-
       - name: Build
         run: |
            EXISTING_MINETEST_DIR=$PWD \
            ./util/buildbot/buildwin64.sh B
-
       # Check that the resulting binary can run (DLLs etc.)
       - name: Runtime test
         run: |
@@ -55,7 +53,6 @@ jobs:
           unzip -q -d "$dest" B/build/*.zip
           cd "$dest"/luanti-*-win*
           wine bin/luanti.exe --version
-
       - uses: actions/upload-artifact@v4
         with:
           name: "mingw64"
@@ -89,7 +86,6 @@ jobs:
           -DENABLE_LUAJIT=TRUE  `
           -DREQUIRE_LUAJIT=TRUE  `
           -DRUN_IN_PLACE=TRUE .
-
       - name: Build
         run: cmake --build . --config Release
 
@@ -103,7 +99,6 @@ jobs:
         run: |
           cpack -G ZIP -B "$env:GITHUB_WORKSPACE\Package"
           rm -r $env:GITHUB_WORKSPACE\Package\_CPack_Packages
-
       - uses: actions/upload-artifact@v4
         with:
           name: msvc-x64-portable
