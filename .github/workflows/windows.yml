@@ -39,20 +39,24 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install compiler
         run: |
+          sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends gettext wine wine64
           sudo ./util/buildbot/download_toolchain.sh /usr
+
       - name: Build
         run: |
            EXISTING_MINETEST_DIR=$PWD \
            ./util/buildbot/buildwin64.sh B
+
       # Check that the resulting binary can run (DLLs etc.)
       - name: Runtime test
         run: |
           dest=$(mktemp -d)
           unzip -q -d "$dest" B/build/*.zip
           cd "$dest"/luanti-*-win*
-          wine bin/luanti.exe --version
+          wine64 bin/luanti.exe --version
+
       - uses: actions/upload-artifact@v4
         with:
           name: "mingw64"
@@ -60,11 +64,23 @@ jobs:
           if-no-files-found: error
 
   msvc:
-    name: VS 2019 x64-portable
+    name: VS 2019 ${{ matrix.config.arch }}-${{ matrix.type }}
     runs-on: windows-2019
     env:
       VCPKG_VERSION: 01f602195983451bc83e72f4214af2cbc495aa94
-      vcpkg_packages: zlib zstd curl[winssl] openal-soft libvorbis libogg libjpeg-turbo sqlite3 freetype luajit gmp jsoncpp sdl2
+      # 2024.05.24
+      vcpkg_packages: zlib zstd curl[winssl] openal-soft libvorbis libogg libjpeg-turbo sqlite3 freetype luajit gmp jsoncpp opengl-registry
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+              arch: x64,
+              generator: "-G'Visual Studio 16 2019' -A x64",
+              vcpkg_triplet: x64-windows
+            }
+        type: [portable]
+
     steps:
       - uses: actions/checkout@v4
 
@@ -73,23 +89,25 @@ jobs:
         with:
           vcpkgArguments: ${{env.vcpkg_packages}}
           vcpkgDirectory: '${{ github.workspace }}\vcpkg'
-          appendedCacheKey: x64-windows
+          appendedCacheKey: ${{ matrix.config.vcpkg_triplet }}
           vcpkgGitCommitId: ${{ env.VCPKG_VERSION }}
-          vcpkgTriplet: x64-windows
+          vcpkgTriplet: ${{ matrix.config.vcpkg_triplet }}
 
       - name: CMake
         run: |
-          cmake -G'Visual Studio 16 2019' -A x64 `
+          cmake ${{matrix.config.generator}}  `
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
           -DCMAKE_BUILD_TYPE=Release  `
           -DENABLE_POSTGRESQL=OFF  `
           -DENABLE_LUAJIT=TRUE  `
           -DREQUIRE_LUAJIT=TRUE  `
-          -DRUN_IN_PLACE=TRUE .
+          -DRUN_IN_PLACE=${{ contains(matrix.type, 'portable') }} .
+
       - name: Build
         run: cmake --build . --config Release
 
       - name: Unittests
+        # need this workaround for stdout to work
         run: |
           $proc = start .\bin\Release\luanti.exe --run-unittests -NoNewWindow -Wait -PassThru
           exit $proc.ExitCode
@@ -97,9 +115,20 @@ jobs:
 
       - name: CPack
         run: |
-          cpack -G ZIP -B "$env:GITHUB_WORKSPACE\Package"
+          If ($env:TYPE -eq "installer")
+          {
+            cpack -G WIX -B "$env:GITHUB_WORKSPACE\Package"
+          }
+          ElseIf($env:TYPE -eq "portable")
+          {
+            cpack -G ZIP -B "$env:GITHUB_WORKSPACE\Package"
+          }
           rm -r $env:GITHUB_WORKSPACE\Package\_CPack_Packages
+        env:
+          TYPE: ${{matrix.type}}
+
       - uses: actions/upload-artifact@v4
         with:
-          name: msvc-x64-portable
-          path: .\Package\*.zip
+          name: msvc-${{ matrix.config.arch }}-${{ matrix.type }}
+          path: .\Package\
+          if-no-files-found: error
