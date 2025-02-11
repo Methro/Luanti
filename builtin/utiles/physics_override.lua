@@ -1,6 +1,3 @@
--- Credits to Lizzy Fleckenstein
--- lgpl license
-
 local legit_override
 
 core.register_globalstep(function()
