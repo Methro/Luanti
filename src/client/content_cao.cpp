@@ -33,6 +33,7 @@
 #include "client/shader.h"
 #include "client/minimap.h"
 #include <quaternion.h>
+#include "script/scripting_client.h"
 #include <SMesh.h>
 #include <IMeshBuffer.h>
 #include <SMeshBuffer.h>
@@ -1703,7 +1704,7 @@ void GenericCAO::processMessage(const std::string &data)
 			if (client->modsLoaded() && client->getScript()->on_recieve_physics_override(override_speed, override_jump, override_gravity, sneak, sneak_glitch, new_move, 
 			override_speed_climb, override_speed_crouch, override_liquid_fluidity, override_liquid_fluidity_smooth, override_liquid_sink, override_acceleration_default, override_acceleration_air))
 				return;
-				
+
 			auto &phys = m_env->getLocalPlayer()->physics_override;
 			phys.speed = override_speed;
 			phys.jump = override_jump;
