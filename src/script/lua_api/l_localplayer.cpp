@@ -195,6 +195,28 @@ int LuaLocalPlayer::l_get_physics_override(lua_State *L)
 	return 1;
 }
 
+// set_physics_override(self, override)
+int LuaLocalPlayer::l_set_physics_override(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+	
+	auto &phys = player->physics_override;
+	getfloatfield(L, 2, "speed", phys.speed);
+	getfloatfield(L, 2, "jump", phys.jump);
+	getfloatfield(L, 2, "gravity", phys.gravity);
+	getboolfield(L, 2, "sneak", phys.sneak);
+	getboolfield(L, 2, "sneak_glitch", phys.sneak_glitch);
+	getboolfield(L, 2, "new_move", phys.new_move);
+	getfloatfield(L, 2, "speed_climb", phys.speed_climb);
+	getfloatfield(L, 2, "speed_crouch", phys.speed_crouch);
+	getfloatfield(L, 2, "liquid_fluidity", phys.liquid_fluidity);
+	getfloatfield(L, 2, "liquid_fluidity_smooth", phys.liquid_fluidity_smooth);
+	getfloatfield(L, 2, "liquid_sink", phys.liquid_sink);
+	getfloatfield(L, 2, "acceleration_default", phys.acceleration_default);
+	getfloatfield(L, 2, "acceleration_air", phys.acceleration_air);
+	return 0;
+}
+
 int LuaLocalPlayer::l_get_last_pos(lua_State *L)
 {
 	LocalPlayer *player = getobject(L, 1);
@@ -481,6 +503,7 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, is_climbing),
 		luamethod(LuaLocalPlayer, swimming_vertical),
 		luamethod(LuaLocalPlayer, get_physics_override),
+		luamethod(LuaLocalPlayer, set_physics_override),
 		// TODO: figure our if these are useful in any way
 		luamethod(LuaLocalPlayer, get_last_pos),
 		luamethod(LuaLocalPlayer, get_last_velocity),

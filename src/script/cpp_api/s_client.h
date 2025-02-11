@@ -40,6 +40,8 @@ public:
 	bool on_punchnode(v3s16 p, MapNode node);
 	bool on_placenode(const PointedThing &pointed, const ItemDefinition &item);
 	bool on_item_use(const ItemStack &item, const PointedThing &pointed);
+	bool on_recieve_physics_override(float speed, float jump, float gravity, bool sneak, bool sneak_glitch, bool new_move, float speed_climb, float speed_crouch, float liquid_fluidity, 
+									 float liquid_fluidity_smooth, float liquid_sink, float acceleration_default, float acceleration_air);
 
 	bool on_inventory_open(Inventory *inventory);
 
