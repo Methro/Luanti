@@ -2606,6 +2606,7 @@ void Game::handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation 
 		f32 hp_max = player->getCAO() ?
 			player->getCAO()->getProperties().hp_max : PLAYER_MAX_HP_DEFAULT;
 		f32 damage_ratio = event->player_damage.amount / hp_max;
+		
 
 		/* Disable damage flash
 		 runData.damage_flash += 95.0f + 64.f * damage_ratio;
