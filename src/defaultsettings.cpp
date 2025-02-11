@@ -357,9 +357,9 @@ void set_default_settings()
 	settings->setDefault("mouse_sensitivity", "0.2");
 	settings->setDefault("repeat_place_time", "0.25");
 	settings->setDefault("repeat_dig_time", "0.0");
-	settings->setDefault("overrides", "false");
-    settings->setDefault("overrides.old_movement", "false");
-    settings->setDefault("overrides.sneak_glitch", "false");
+	settings->setDefault("overrides", "true");
+    settings->setDefault("overrides.old_movement", "true");
+    settings->setDefault("overrides.sneak_glitch", "true");
 	settings->setDefault("safe_dig_and_place", "false");
 	settings->setDefault("random_input", "false");
 	settings->setDefault("aux1_descends", "false");
