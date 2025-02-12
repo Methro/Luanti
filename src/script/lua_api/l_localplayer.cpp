@@ -1,7 +1,23 @@
-// Luanti
-// SPDX-License-Identifier: LGPL-2.1-or-later
-// Copyright (C) 2017 Dumbeldor, Vincent Glize <vincent.glize@live.fr>
+/*
+Minetest
+Copyright (C) 2017 Dumbeldor, Vincent Glize <vincent.glize@live.fr>
 
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+#include "l_clientobject.h"
 #include "l_localplayer.h"
 #include "l_internal.h"
 #include "lua_api/l_item.h"
@@ -10,6 +26,9 @@
 #include "hud.h"
 #include "common/c_content.h"
 #include "client/content_cao.h"
+#include "client/client.h"
+#include "client/game.h"
+#include <iostream>
 
 LuaLocalPlayer::LuaLocalPlayer(LocalPlayer *m) : m_localplayer(m)
 {
@@ -41,7 +60,7 @@ int LuaLocalPlayer::l_get_velocity(lua_State *L)
 {
 	LocalPlayer *player = getobject(L, 1);
 
-	push_v3f(L, player->getSpeed() / BS);
+	push_v3f(L, player->getSendSpeed() / BS);
 	return 1;
 }
 
@@ -53,11 +72,23 @@ int LuaLocalPlayer::l_get_hp(lua_State *L)
 	return 1;
 }
 
+int LuaLocalPlayer::l_get_yaw(lua_State *L)
+{
+    lua_pushnumber(L, wrapDegrees_0_360(g_game->cam_view.camera_yaw));
+    return 1;
+}
+
+int LuaLocalPlayer::l_get_pitch(lua_State *L)
+{
+    lua_pushnumber(L, -wrapDegrees_180(g_game->cam_view.camera_pitch) );
+    return 1;
+}
+
 int LuaLocalPlayer::l_get_name(lua_State *L)
 {
 	LocalPlayer *player = getobject(L, 1);
 
-	lua_pushstring(L, player->getName().c_str());
+	lua_pushstring(L, player->getName());
 	return 1;
 }
 
@@ -78,6 +109,24 @@ int LuaLocalPlayer::l_get_wielded_item(lua_State *L)
 	ItemStack selected_item;
 	player->getWieldedItem(&selected_item, nullptr);
 	LuaItemStack::create(L, selected_item);
+	return 1;
+}
+
+// get item range of currently wielded item
+// get_wielded_item_range(self)
+int LuaLocalPlayer::l_get_wielded_item_range(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	ItemStack selected_item, hand_item;
+	player->getWieldedItem(&selected_item, &hand_item);
+	f32 d = getToolRange(selected_item, hand_item, g_game->itemdef_manager);
+
+	if (g_settings->getBool("reach"))
+		d += 2;
+
+	lua_pushnumber(L, d);
+
 	return 1;
 }
 
@@ -183,15 +232,6 @@ int LuaLocalPlayer::l_get_physics_override(lua_State *L)
 	lua_pushnumber(L, phys.acceleration_air);
 	lua_setfield(L, -2, "acceleration_air");
 
-	lua_pushnumber(L, phys.speed_fast);
-	lua_setfield(L, -2, "speed_fast");
-
-	lua_pushnumber(L, phys.acceleration_fast);
-	lua_setfield(L, -2, "acceleration_fast");
-
-	lua_pushnumber(L, phys.speed_walk);
-	lua_setfield(L, -2, "speed_walk");
-
 	return 1;
 }
 
@@ -201,6 +241,7 @@ int LuaLocalPlayer::l_set_physics_override(lua_State *L)
 	LocalPlayer *player = getobject(L, 1);
 	
 	auto &phys = player->physics_override;
+
 	getfloatfield(L, 2, "speed", phys.speed);
 	getfloatfield(L, 2, "jump", phys.jump);
 	getfloatfield(L, 2, "gravity", phys.gravity);
@@ -214,6 +255,7 @@ int LuaLocalPlayer::l_set_physics_override(lua_State *L)
 	getfloatfield(L, 2, "liquid_sink", phys.liquid_sink);
 	getfloatfield(L, 2, "acceleration_default", phys.acceleration_default);
 	getfloatfield(L, 2, "acceleration_air", phys.acceleration_air);
+
 	return 0;
 }
 
@@ -267,13 +309,12 @@ int LuaLocalPlayer::l_get_control(lua_State *L)
 	set("zoom",  c.zoom);
 	set("dig",   c.dig);
 	set("place", c.place);
-
-	v2f movement = c.getMovement();
-	lua_pushnumber(L, movement.X);
-	lua_setfield(L, -2, "movement_x");
-	lua_pushnumber(L, movement.Y);
-	lua_setfield(L, -2, "movement_y");
-
+	// Player movement in polar coordinates and non-binary speed
+	lua_pushnumber(L, c.movement_speed);
+	lua_setfield(L, -2, "movement_speed");
+	lua_pushnumber(L, c.movement_direction);
+	lua_setfield(L, -2, "movement_direction");
+	// Provide direction keys to ensure compatibility
 	set("up",    c.direction_keys & (1 << 0));
 	set("down",  c.direction_keys & (1 << 1));
 	set("left",  c.direction_keys & (1 << 2));
@@ -296,7 +337,7 @@ int LuaLocalPlayer::l_get_pos(lua_State *L)
 {
 	LocalPlayer *player = getobject(L, 1);
 
-	push_v3f(L, player->getPosition() / BS);
+	push_v3f(L, player->getLegitPosition() / BS);
 	return 1;
 }
 
@@ -439,6 +480,27 @@ int LuaLocalPlayer::l_hud_get(lua_State *L)
 	return 1;
 }
 
+// get_object(self)
+int LuaLocalPlayer::l_get_object(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+	ClientEnvironment &env = getClient(L)->getEnv();
+	ClientActiveObject *obj = env.getGenericCAO(player->getCAO()->getId());
+
+	push_objectRef(L, obj->getId());
+
+	return 1;
+}
+
+// get_hotbar_size(self)
+int LuaLocalPlayer::l_get_hotbar_size(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+	lua_pushnumber(L, player->hud_hotbar_itemcount);
+	return 1;
+}
+
+
 // hud_get_all(self)
 int LuaLocalPlayer::l_hud_get_all(lua_State *L)
 {
@@ -489,11 +551,185 @@ void LuaLocalPlayer::Register(lua_State *L)
 	registerClass(L, className, methods, metamethods);
 }
 
+
+/*
+SETTERS
+*/
+// set_velocity(self, velocity)
+int LuaLocalPlayer::l_set_velocity(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	v3f pos = checkFloatPos(L, 2);
+	player->setSpeed(pos);
+
+	return 0;
+}
+
+// set_yaw(self, yaw)
+int LuaLocalPlayer::l_set_yaw(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	if (lua_isnumber(L, 2)) {
+		double yaw = lua_tonumber(L, 2);
+		player->setLegitYaw(yaw);
+		if (!g_settings->getBool("freecam")) {
+			g_game->cam_view.camera_yaw = yaw;
+			g_game->cam_view_target.camera_yaw = yaw;
+		}
+	}
+
+	return 0;
+}
+
+// set_pitch(self, pitch)
+int LuaLocalPlayer::l_set_pitch(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	if (lua_isnumber(L, 2)) {
+		double pitch = lua_tonumber(L, 2);
+		player->setLegitPitch(pitch);
+		if (!g_settings->getBool("freecam")) {
+			g_game->cam_view.camera_pitch = pitch;
+			g_game->cam_view_target.camera_pitch = pitch;
+		}
+	}
+
+	return 0;
+}
+
+// set_wield_index(self, index)
+int LuaLocalPlayer::l_set_wield_index(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+	u32 index = luaL_checkinteger(L, 2) - 1;
+
+	player->setWieldIndex(index);
+	g_game->processItemSelection(&g_game->runData.new_playeritem);
+	ItemStack selected_item, hand_item;
+	ItemStack &tool_item = player->getWieldedItem(&selected_item, &hand_item);
+	g_game->camera->wield(tool_item);
+	return 0;
+}
+
+// set_pos(self, pos)
+int LuaLocalPlayer::l_set_pos(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	v3f pos = checkFloatPos(L, 2);
+	player->setLegitPosition(pos);
+	getClient(L)->sendPlayerPos();
+	return 0;
+}
+
+// get_pointed_thing(self)
+int LuaLocalPlayer::l_get_pointed_thing(lua_State *L)
+{
+	PointedThing pointed = g_game->runData.pointed_old;
+	push_pointed_thing(L, pointed, true, true);
+	return 1;
+}
+
+// get_object_or_nil(self)
+int LuaLocalPlayer::l_get_object_or_nil(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+
+	GenericCAO *gcao = player->getCAO();
+	if (gcao) {
+		//push_generic_cao
+		lua_newtable(L);
+		lua_pushnumber(L, gcao->getId());
+		lua_setfield(L, -2, "id");
+		lua_pushboolean(L, gcao->isPlayer());
+		lua_setfield(L, -2, "is_player");
+		lua_pushboolean(L, gcao->isLocalPlayer());
+		lua_setfield(L, -2, "is_local_player");
+		lua_pushboolean(L, gcao->isVisible());
+		lua_setfield(L, -2, "is_visible");
+		lua_pushstring(L, gcao->getName().c_str());
+		lua_setfield(L, -2, "name");
+		push_v3f(L, gcao->getPosition() / BS);
+		lua_setfield(L, -2, "position");
+		push_v3f(L, gcao->getVelocity() / BS);
+		lua_setfield(L, -2, "velocity");
+		push_v3f(L, gcao->getAcceleration());
+		lua_setfield(L, -2, "acceleration");
+		push_v3f(L, gcao->getRotation());
+		lua_setfield(L, -2, "rotation");
+		lua_pushnumber(L, gcao->getHp());
+		lua_setfield(L, -2, "hp");
+		lua_pushboolean(L, gcao->isImmortal());
+		lua_setfield(L, -2, "is_immortal");
+		lua_pushboolean(L, gcao->collideWithObjects());
+		lua_setfield(L, -2, "collide_with_objects");
+		push_object_properties(L, &gcao->getProperties());
+		lua_setfield(L, -2, "props");
+		return 1;
+	}
+	lua_pushnil(L);
+	return 0;
+}
+
+// get_entity_relationship(self, object_id)
+int LuaLocalPlayer::l_get_entity_relationship(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+	u16 object_id = lua_tointeger(L, 2);
+
+	ClientEnvironment &env = getClient(L)->getEnv();
+	GenericCAO *gcao = env.getGenericCAO(object_id);
+
+	EntityRelationship relationship = player->getEntityRelationship(gcao);
+
+	lua_pushinteger(L, relationship);
+
+	return 1;
+}
+
+// punch(self, object_id)
+int LuaLocalPlayer::l_punch(lua_State *L)
+{
+	u16 object_id = lua_tointeger(L, 2);
+
+	g_game->runData.punching = true;
+	g_game->runData.time_from_last_punch = 0;
+	g_game->runData.object_hit_delay_timer = 0.2;
+
+	PointedThing pointed(object_id, v3f(0, 0, 0), v3f(0, 0, 0), v3f(0, 0, 0), 0, PointabilityType::POINTABLE);
+	getClient(L)->interact(INTERACT_START_DIGGING, pointed);
+
+	return 0;
+}
+
+// get_time_from_last_punch(self)
+int LuaLocalPlayer::l_get_time_from_last_punch(lua_State *L)
+{
+	lua_pushnumber(L, g_game->runData.time_from_last_punch);
+
+	return 1;
+}
+
+// get_hotbar_length(self)
+int LuaLocalPlayer::l_get_hotbar_length(lua_State *L)
+{
+	LocalPlayer *player = getobject(L, 1);
+	lua_pushnumber(L, player->hud_hotbar_itemcount);
+
+	return 1;
+}
+
+
 const char LuaLocalPlayer::className[] = "LocalPlayer";
 const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, get_velocity),
 		luamethod(LuaLocalPlayer, get_hp),
 		luamethod(LuaLocalPlayer, get_name),
+		luamethod(LuaLocalPlayer, get_yaw),
+		luamethod(LuaLocalPlayer, get_pitch),
 		luamethod(LuaLocalPlayer, get_wield_index),
 		luamethod(LuaLocalPlayer, get_wielded_item),
 		luamethod(LuaLocalPlayer, is_attached),
@@ -503,7 +739,7 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, is_climbing),
 		luamethod(LuaLocalPlayer, swimming_vertical),
 		luamethod(LuaLocalPlayer, get_physics_override),
-		luamethod(LuaLocalPlayer, set_physics_override),
+        luamethod(LuaLocalPlayer, set_physics_override),
 		// TODO: figure our if these are useful in any way
 		luamethod(LuaLocalPlayer, get_last_pos),
 		luamethod(LuaLocalPlayer, get_last_velocity),
@@ -521,9 +757,24 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, hud_remove),
 		luamethod(LuaLocalPlayer, hud_change),
 		luamethod(LuaLocalPlayer, hud_get),
+        luamethod(LuaLocalPlayer, get_object),
+        luamethod(LuaLocalPlayer, get_hotbar_size),
 		luamethod(LuaLocalPlayer, hud_get_all),
 
 		luamethod(LuaLocalPlayer, get_move_resistance),
+
+		luamethod(LuaLocalPlayer, set_velocity),
+		luamethod(LuaLocalPlayer, set_yaw),
+		luamethod(LuaLocalPlayer, set_pitch),
+		luamethod(LuaLocalPlayer, set_wield_index),
+		luamethod(LuaLocalPlayer, set_pos),
+		luamethod(LuaLocalPlayer, get_pointed_thing),
+		luamethod(LuaLocalPlayer, get_object_or_nil),
+		luamethod(LuaLocalPlayer, get_entity_relationship),
+		luamethod(LuaLocalPlayer, punch),
+		luamethod(LuaLocalPlayer, get_time_from_last_punch),
+		luamethod(LuaLocalPlayer, get_wielded_item_range),
+		luamethod(LuaLocalPlayer, get_hotbar_length),
 
 		{0, 0}
 };
