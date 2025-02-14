@@ -503,7 +503,7 @@ const luaL_Reg LuaLocalPlayer::methods[] = {
 		luamethod(LuaLocalPlayer, is_climbing),
 		luamethod(LuaLocalPlayer, swimming_vertical),
 		luamethod(LuaLocalPlayer, get_physics_override),
-		luamethod(LuaLocalPlayer, set_physics_overrie),
+		luamethod(LuaLocalPlayer, set_physics_override),
 		// TODO: figure our if these are useful in any way
 		luamethod(LuaLocalPlayer, get_last_pos),
 		luamethod(LuaLocalPlayer, get_last_velocity),
