@@ -98,7 +98,7 @@ void set_default_settings()
 	// input method used.
 	settings->setDefault("touch_gui", bool_to_cstr(has_touch));
 	settings->setDefault("sound_volume", "0.8");
-	settings->setDefault("sound_volume_unfocused", "0.3");
+	settings->setDefault("sound_volume_unfocused", "0.1");
 	settings->setDefault("mute_sound", "false");
 	settings->setDefault("sound_extensions_blacklist", "");
 	settings->setDefault("mesh_generation_interval", "0");
