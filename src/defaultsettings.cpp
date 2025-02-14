@@ -127,6 +127,12 @@ void set_default_settings()
 	settings->setDefault("enable_raytraced_culling", "true");
 	settings->setDefault("chat_weblink_color", "#8888FF");
 
+	//Movement
+
+	settings->setDefault("overrides", "false");
+    settings->setDefault("overrides.old_movement", "false");
+    settings->setDefault("overrides.sneak_glitch", "false");
+
 	// Keymap
 	settings->setDefault("remote_port", "30000");
 	settings->setDefault("keymap_forward", "KEY_KEY_W");

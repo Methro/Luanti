@@ -15,6 +15,7 @@
 #include "util/basic_macros.h"
 #include "util/numeric.h"
 #include "util/serialize.h"
+#include "script/scripting_client.h"
 #include "camera.h" // CameraModes
 #include "collision.h"
 #include "content_cso.h"
@@ -1697,6 +1698,11 @@ void GenericCAO::processMessage(const std::string &data)
 		}
 
 		if (m_is_local_player) {
+			Client *client = m_env->getGameDef();
+			if (client->modsLoaded() && client->getScript()->on_recieve_physics_override(override_speed, override_jump, override_gravity, sneak, sneak_glitch, new_move, 
+				override_speed_climb, override_speed_crouch, override_liquid_fluidity, override_liquid_fluidity_smooth, override_liquid_sink, override_acceleration_default, override_acceleration_air))
+					return;
+
 			auto &phys = m_env->getLocalPlayer()->physics_override;
 			phys.speed = override_speed;
 			phys.jump = override_jump;
@@ -1711,9 +1717,6 @@ void GenericCAO::processMessage(const std::string &data)
 			phys.liquid_sink = override_liquid_sink;
 			phys.acceleration_default = override_acceleration_default;
 			phys.acceleration_air = override_acceleration_air;
-			phys.speed_fast = override_speed_fast;
-			phys.acceleration_fast = override_acceleration_fast;
-			phys.speed_walk = override_speed_walk;
 		}
 	} else if (cmd == AO_CMD_SET_ANIMATION) {
 		v2f range = readV2F32(is);
