@@ -1,10 +1,8 @@
 #pragma once
 
+#include "irrlichttypes_extrabloated.h"
 #include <algorithm>
-#include <IGUIElement.h>
-#include <IGUIEnvironment.h>
-
-using namespace irr;
+#include <string>
 
 class ISimpleTextureSource;
 

@@ -7,7 +7,7 @@
 
 #include "irrlichttypes_bloated.h"
 #include <string>
-#include "util/enum_string.h"
+#include "common/c_types.h"
 
 #define HUD_DIR_LEFT_RIGHT 0
 #define HUD_DIR_RIGHT_LEFT 1

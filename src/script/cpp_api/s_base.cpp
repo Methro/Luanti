@@ -203,13 +203,9 @@ void ScriptApiBase::checkSetByBuiltin()
 {
 	lua_State *L = getStack();
 
-	CHECK(CUSTOM_RIDX_READ_VECTOR, "read_vector");
-	CHECK(CUSTOM_RIDX_PUSH_VECTOR, "push_vector");
-
-	if (getType() == ScriptingType::Server ||
-			(getType() == ScriptingType::Async && m_gamedef) ||
-			getType() == ScriptingType::Emerge ||
-			getType() == ScriptingType::Client) {
+	if (m_gamedef) {
+		CHECK(CUSTOM_RIDX_READ_VECTOR, "read_vector");
+		CHECK(CUSTOM_RIDX_PUSH_VECTOR, "push_vector");
 		CHECK(CUSTOM_RIDX_READ_NODE, "read_node");
 		CHECK(CUSTOM_RIDX_PUSH_NODE, "push_node");
 	}

@@ -15,8 +15,6 @@
 #include "IGUIFont.h"
 #include "IGUIImage.h"
 #include "IGUIStaticText.h"
-#include <IGUIElement.h>
-#include <IGUIEnvironment.h>
 
 GUITouchscreenLayout::GUITouchscreenLayout(gui::IGUIEnvironment* env,
 		gui::IGUIElement* parent, s32 id,
@@ -25,7 +23,10 @@ GUITouchscreenLayout::GUITouchscreenLayout(gui::IGUIEnvironment* env,
 	GUIModalMenu(env, parent, id, menumgr),
 	m_tsrc(tsrc)
 {
-	m_layout = ButtonLayout::loadFromSettings();
+	if (g_touchcontrols)
+		m_layout = g_touchcontrols->getLayout();
+	else
+		m_layout = ButtonLayout::loadFromSettings();
 
 	m_gui_help_text = grab_gui_element<IGUIStaticText>(Environment->addStaticText(
 			L"", core::recti(), false, false, this, -1));
@@ -377,6 +378,8 @@ bool GUITouchscreenLayout::OnEvent(const SEvent& event)
 			}
 
 			if (event.GUIEvent.Caller == m_gui_done_btn.get()) {
+				if (g_touchcontrols)
+					g_touchcontrols->applyLayout(m_layout);
 				std::ostringstream oss;
 				m_layout.serializeJson(oss);
 				g_settings->set("touch_layout", oss.str());

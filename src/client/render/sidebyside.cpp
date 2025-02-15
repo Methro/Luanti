@@ -7,7 +7,6 @@
 #include "client/client.h"
 #include "client/hud.h"
 #include "client/camera.h"
-#include <ISceneManager.h>
 
 DrawImageStep::DrawImageStep(u8 texture_index, v2f _offset) :
 	texture_index(texture_index), offset(_offset)

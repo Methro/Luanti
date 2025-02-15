@@ -847,8 +847,9 @@ int ModApiEnv::l_find_node_near(lua_State *L)
 void ModApiEnvBase::checkArea(v3s16 &minp, v3s16 &maxp)
 {
 	auto volume = VoxelArea(minp, maxp).getVolume();
-	if (volume > MAX_WORKING_VOLUME) {
-		throw LuaError("Area volume exceeds allowed value of " + std::to_string(MAX_WORKING_VOLUME));
+	// Volume limit equal to 8 default mapchunks, (80 * 2) ^ 3 = 4,096,000
+	if (volume > 4096000) {
+		throw LuaError("Area volume exceeds allowed value of 4096000");
 	}
 
 	// Clamp to map range to avoid problems

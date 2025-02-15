@@ -11,7 +11,6 @@
 #include "client/hud.h"
 #include "client/minimap.h"
 #include "client/shadows/dynamicshadowsrender.h"
-#include <IGUIEnvironment.h>
 
 /// Draw3D pipeline step
 void Draw3D::run(PipelineContext &context)

@@ -16,7 +16,7 @@ struct ObjectProperties
 	/* member variables ordered roughly by size */
 
 	std::vector<std::string> textures;
-	std::vector<video::SColor> colors; // Currently unused
+	std::vector<video::SColor> colors;
 	// Values are BS=1
 	aabb3f collisionbox = aabb3f(-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f);
 	// Values are BS=1

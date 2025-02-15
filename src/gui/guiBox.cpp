@@ -4,7 +4,6 @@
 
 #include "guiBox.h"
 #include <IVideoDriver.h>
-#include "irr_v2d.h"
 
 GUIBox::GUIBox(gui::IGUIEnvironment *env, gui::IGUIElement *parent, s32 id,
 	const core::rect<s32> &rectangle,

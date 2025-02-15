@@ -23,8 +23,6 @@
 #include "IGUIFont.h"
 #include <IrrlichtDevice.h>
 #include <ISceneCollisionManager.h>
-#include <IGUIElement.h>
-#include <IGUIEnvironment.h>
 
 #include <iostream>
 #include <algorithm>
@@ -203,40 +201,19 @@ static EKEY_CODE id_to_keycode(touch_gui_button_id id)
 }
 
 
-static const char *setting_names[] = {
-	"touchscreen_threshold", "touch_long_tap_delay",
-	"fixed_virtual_joystick", "virtual_joystick_triggers_aux1",
-	"touch_layout",
-};
-
 TouchControls::TouchControls(IrrlichtDevice *device, ISimpleTextureSource *tsrc):
 		m_device(device),
 		m_guienv(device->getGUIEnvironment()),
 		m_receiver(device->getEventReceiver()),
 		m_texturesource(tsrc)
 {
-	m_screensize = m_device->getVideoDriver()->getScreenSize();
-	m_button_size = ButtonLayout::getButtonSize(m_screensize);
-
-	readSettings();
-	for (auto name : setting_names)
-		g_settings->registerChangedCallback(name, settingChangedCallback, this);
-}
-
-void TouchControls::settingChangedCallback(const std::string &name, void *data)
-{
-	static_cast<TouchControls *>(data)->readSettings();
-}
-
-void TouchControls::readSettings()
-{
 	m_touchscreen_threshold = g_settings->getU16("touchscreen_threshold");
 	m_long_tap_delay = g_settings->getU16("touch_long_tap_delay");
 	m_fixed_joystick = g_settings->getBool("fixed_virtual_joystick");
 	m_joystick_triggers_aux1 = g_settings->getBool("virtual_joystick_triggers_aux1");
 
-	// Note that "fixed_virtual_joystick" and "virtual_joystick_triggers_aux1"
-	// also affect the layout.
+	m_screensize = m_device->getVideoDriver()->getScreenSize();
+	m_button_size = ButtonLayout::getButtonSize(m_screensize);
 	applyLayout(ButtonLayout::loadFromSettings());
 }
 
@@ -337,7 +314,6 @@ void TouchControls::applyLayout(const ButtonLayout &layout)
 
 TouchControls::~TouchControls()
 {
-	g_settings->deregisterAllChangedCallbacks(this);
 	releaseAll();
 }
 
@@ -499,7 +475,7 @@ void TouchControls::translateEvent(const SEvent &event)
 
 			toggleOverflowMenu();
 			// refresh since visibility of buttons has changed
-			element = m_guienv->getRootGUIElement()->getElementFromPoint(touch_pos);
+		 	element = m_guienv->getRootGUIElement()->getElementFromPoint(touch_pos);
 			// continue processing, but avoid accidentally placing a node
 			// when closing the overflow menu
 			prevent_short_tap = true;

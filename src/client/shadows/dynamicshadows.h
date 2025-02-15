@@ -34,9 +34,9 @@ public:
 			f32 farValue = 100.0f);
 	~DirectionalLight() = default;
 
-	void updateCameraOffset(const Camera *cam);
+	//DISABLE_CLASS_COPY(DirectionalLight)
 
-	void updateFrustum(const Camera *cam, Client *client);
+	void update_frustum(const Camera *cam, Client *client, bool force = false);
 
 	// when set direction is updated to negative normalized(direction)
 	void setDirection(v3f dir);

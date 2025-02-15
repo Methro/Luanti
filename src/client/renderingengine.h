@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include "client/inputhandler.h"
+#include "irrlichttypes_extrabloated.h"
 #include "debug.h"
 #include "config.h"
 #include "client/shader.h"

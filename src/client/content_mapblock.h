@@ -47,6 +47,7 @@ class MapblockMeshGenerator
 public:
 	MapblockMeshGenerator(MeshMakeData *input, MeshCollector *output);
 	void generate();
+	void renderSingle(content_t node, u8 param2 = 0x00);
 
 private:
 	MeshMakeData *const data;
@@ -58,12 +59,15 @@ private:
 
 // current node
 	struct {
-		v3s16 p; // relative to blockpos_nodes
-		v3f origin; // p in BS space
+		v3s16 p;
+		v3f origin;
 		MapNode n;
 		const ContentFeatures *f;
-		LightFrame lframe; // smooth lighting
-		video::SColor lcolor; // unsmooth lighting
+		LightPair light;
+		LightFrame frame;
+		video::SColor color;
+		TileSpec tile;
+		f32 scale;
 	} cur_node;
 
 // lighting
@@ -72,23 +76,21 @@ private:
 	video::SColor blendLightColor(const v3f &vertex_pos);
 	video::SColor blendLightColor(const v3f &vertex_pos, const v3f &vertex_normal);
 
-	void useTile(TileSpec *tile_ret, int index = 0, u8 set_flags = MATERIAL_FLAG_CRACK_OVERLAY,
+	void useTile(int index = 0, u8 set_flags = MATERIAL_FLAG_CRACK_OVERLAY,
 		u8 reset_flags = 0, bool special = false);
-	void getTile(int index, TileSpec *tile_ret);
-	void getTile(v3s16 direction, TileSpec *tile_ret);
-	void getSpecialTile(int index, TileSpec *tile_ret, bool apply_crack = false);
+	void getTile(int index, TileSpec *tile);
+	void getTile(v3s16 direction, TileSpec *tile);
+	void getSpecialTile(int index, TileSpec *tile, bool apply_crack = false);
 
 // face drawing
-	void drawQuad(const TileSpec &tile, v3f *vertices, const v3s16 &normal = v3s16(0, 0, 0),
+	void drawQuad(v3f *vertices, const v3s16 &normal = v3s16(0, 0, 0),
 		float vertical_tiling = 1.0);
 
 // cuboid drawing!
 	template <typename Fn>
-	void drawCuboid(const aabb3f &box, const TileSpec *tiles, int tilecount,
-			const f32 *txc, u8 mask, Fn &&face_lighter);
+	void drawCuboid(const aabb3f &box, TileSpec *tiles, int tilecount, const f32 *txc, u8 mask, Fn &&face_lighter);
 	void generateCuboidTextureCoords(aabb3f const &box, f32 *coords);
-	void drawAutoLightedCuboid(aabb3f box, const TileSpec &tile, f32 const *txc	= nullptr, u8 mask = 0);
-	void drawAutoLightedCuboid(aabb3f box, const TileSpec *tiles, int tile_count, f32 const *txc = nullptr, u8 mask = 0);
+	void drawAutoLightedCuboid(aabb3f box, f32 const *txc = nullptr, TileSpec *tiles = nullptr, int tile_count = 0, u8 mask = 0);
 	u8 getNodeBoxMask(aabb3f box, u8 solid_neighbors, u8 sametype_neighbors) const;
 
 // liquid-specific
@@ -111,6 +113,7 @@ private:
 		f32 corner_levels[2][2];
 	};
 	LiquidData cur_liquid;
+	bool smooth_liquids = false;
 
 	void prepareLiquidNodeDrawing();
 	void getLiquidNeighborhood();
@@ -133,7 +136,6 @@ private:
 	struct PlantlikeData {
 		PlantlikeStyle draw_style;
 		v3f offset;
-		float scale;
 		float rotate_degree;
 		bool random_offset_Y;
 		int face_num;
@@ -141,12 +143,12 @@ private:
 	};
 	PlantlikeData cur_plant;
 
-	void drawPlantlikeQuad(const TileSpec &tile, float rotation, float quad_offset = 0,
+	void drawPlantlikeQuad(float rotation, float quad_offset = 0,
 		bool offset_top_only = false);
-	void drawPlantlike(const TileSpec &tile, bool is_rooted = false);
+	void drawPlantlike(bool is_rooted = false);
 
 // firelike-specific
-	void drawFirelikeQuad(const TileSpec &tile, float rotation, float opening_angle,
+	void drawFirelikeQuad(float rotation, float opening_angle,
 		float offset_h, float offset_v = 0.0);
 
 // drawtypes

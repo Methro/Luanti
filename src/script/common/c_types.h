@@ -9,7 +9,14 @@ extern "C" {
 }
 
 #include <iostream>
+
 #include "exceptions.h"
+
+struct EnumString
+{
+	int num;
+	const char *str;
+};
 
 class StackUnroller
 {
@@ -34,3 +41,7 @@ class LuaError : public ModError
 public:
 	LuaError(const std::string &s) : ModError(s) {}
 };
+
+
+extern EnumString es_ItemType[];
+extern EnumString es_TouchInteractionMode[];

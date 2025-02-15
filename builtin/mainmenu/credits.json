@@ -1,5 +1,5 @@
 {
-	"#": "https://github.com/orgs/luanti-org/teams/engine/members",
+	"#": "https://github.com/orgs/minetest/teams/engine/members",
 	"core_developers": [
 		"Perttu Ahola (celeron55) <celeron55@gmail.com> [Project founder]",
 		"sfan5 <sfan5@live.de>",
@@ -15,8 +15,7 @@
 		"Gregor Parzefall (grorp)",
 		"Lars Müller (luatic)",
 		"cx384",
-		"sfence",
-		"y5nw"
+		"sfence"
 	],
 	"previous_core_developers": [
 		"BlockMen",
@@ -39,7 +38,7 @@
 		"Hugues Ross <hugues.ross@gmail.com>",
 		"Dmitry Kostenko (x2048) <codeforsmile@gmail.com>"
 	],
-	"#": "Currently only https://github.com/orgs/luanti-org/teams/triagers/members",
+	"#": "Currently only https://github.com/orgs/minetest/teams/triagers/members",
 	"core_team": [
 		"Zughy [Issue triager]",
 		"wsor [Issue triager]",
@@ -48,20 +47,23 @@
 	"#": "For updating active/previous contributors, see the script in ./util/gather_git_credits.py",
 	"contributors": [
 		"JosiahWI",
-		"Erich Schubert",
-		"wrrrzr",
 		"1F616EMO",
+		"y5nw",
+		"Erich Schubert",
+		"numzero",
 		"red-001 <red-001@outlook.ie>",
-		"veprogames",
-		"paradust7",
-		"AFCMS",
-		"siliconsniffer",
+		"David Heidelberg",
 		"Wuzzy",
+		"paradust7",
+		"HybridDog",
 		"Zemtzov7",
+		"kromka-chleba",
+		"AFCMS",
+		"chmodsayshello",
+		"OgelGames"
 	],
 	"previous_contributors": [
 		"Ælla Chiana Moskopp (erle) <erle@dieweltistgarnichtso.net> [Logo]",
-		"numzero",
 		"Giuseppe Bilotta",
 		"ClobberXD",
 		"Dániel Juhász (juhdanad) <juhdanad@gmail.com>",
