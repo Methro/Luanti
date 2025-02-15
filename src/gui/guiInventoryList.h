@@ -5,11 +5,8 @@
 #pragma once
 
 #include "inventorymanager.h"
-#include <IGUIElement.h>
-#include <IGUIEnvironment.h>
-#include "irr_v2d.h"
-
-using namespace irr;
+#include "irrlichttypes_extrabloated.h"
+#include "util/string.h"
 
 class GUIFormSpecMenu;
 

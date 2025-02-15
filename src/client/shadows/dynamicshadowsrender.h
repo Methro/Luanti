@@ -7,9 +7,8 @@
 #include <string>
 #include <vector>
 #include <IrrlichtDevice.h>
+#include "irrlichttypes_extrabloated.h"
 #include "client/shadows/dynamicshadows.h"
-#include <ISceneNode.h>
-#include <ISceneManager.h>
 
 class ShadowDepthShaderCB;
 class shadowScreenQuad;

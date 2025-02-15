@@ -103,7 +103,6 @@ public:
 	{
 		MinEdge -= d;
 		MaxEdge += d;
-		cacheExtent();
 	}
 
 	/*
@@ -189,7 +188,6 @@ public:
 		ret.MaxEdge.Y = std::min(a.MaxEdge.Y, MaxEdge.Y);
 		ret.MinEdge.Z = std::max(a.MinEdge.Z, MinEdge.Z);
 		ret.MaxEdge.Z = std::min(a.MaxEdge.Z, MaxEdge.Z);
-		ret.cacheExtent();
 
 		return ret;
 	}
@@ -459,9 +457,7 @@ public:
 	{
 		if(!m_area.contains(p))
 			return false;
-		const s32 index = m_area.index(p);
-		m_data[index] = n;
-		m_flags[index] &= ~VOXELFLAG_NO_DATA;
+		m_data[m_area.index(p)] = n;
 		return true;
 	}
 

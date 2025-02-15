@@ -17,11 +17,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #pragma once
 
-#include <IGUIElement.h>
-#include <IGUIEnvironment.h>
-#include "irr_v2d.h"
-
-using namespace irr;
+#include "irrlichttypes_extrabloated.h"
+#include "util/string.h"
 
 class ISimpleTextureSource;
 

@@ -4,10 +4,8 @@
 
 #pragma once
 
-#include <IGUIElement.h>
-#include <IGUIEnvironment.h>
-
-using namespace irr;
+#include "irrlichttypes_extrabloated.h"
+#include "util/string.h"
 
 class Client;
 

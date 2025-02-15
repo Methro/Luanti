@@ -109,7 +109,7 @@ void CMeshSceneNode::render()
 	// for debug purposes only:
 	if (DebugDataVisible && PassCount == 1) {
 		video::SMaterial m;
-		m.AntiAliasing = video::EAAM_OFF;
+		m.AntiAliasing = 0;
 		m.ZBuffer = video::ECFN_DISABLED;
 		driver->setMaterial(m);
 

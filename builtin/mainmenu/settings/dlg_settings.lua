@@ -16,10 +16,11 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-local path = core.get_builtin_path() .. "common" .. DIR_DELIM .. "settings" .. DIR_DELIM
+local component_funcs =  dofile(core.get_mainmenu_path() .. DIR_DELIM ..
+		"settings" .. DIR_DELIM .. "components.lua")
 
-local component_funcs =  dofile(path .. "components.lua")
-local shadows_component =  dofile(path .. "shadows_component.lua")
+local shadows_component =  dofile(core.get_mainmenu_path() .. DIR_DELIM ..
+		"settings" .. DIR_DELIM .. "shadows_component.lua")
 
 local loaded = false
 local full_settings
@@ -109,7 +110,7 @@ local function load()
 	local change_keys = {
 		query_text = "Controls",
 		requires = {
-			keyboard_mouse = true,
+			touch_controls = false,
 		},
 		get_formspec = function(self, avail_w)
 			local btn_w = math.min(avail_w, 3)
@@ -377,9 +378,6 @@ local function check_requirements(name, requires)
 			local required_setting = get_setting_info(req_key)
 			if required_setting == nil then
 				core.log("warning", "Unknown setting " .. req_key .. " required by " .. (name or "???"))
-			elseif required_setting.type ~= "bool" then
-				core.log("warning", "Setting " .. req_key .. " of type " .. required_setting.type ..
-					" used as requirement by " .. (name or "???") .. ", only bool is allowed")
 			end
 			local actual_value = core.settings:get_bool(req_key,
 				required_setting and core.is_yes(required_setting.default))
@@ -516,8 +514,7 @@ local function get_formspec(dialogdata)
 		"box[0,0;", tostring(tabsize.width), ",", tostring(tabsize.height), ";#0000008C]",
 
 		("button[0,%f;%f,0.8;back;%s]"):format(
-				tabsize.height + 0.2, back_w,
-				INIT == "pause_menu" and fgettext("Exit") or fgettext("Back")),
+				tabsize.height + 0.2, back_w, fgettext("Back")),
 
 		("box[%f,%f;%f,0.8;#0000008C]"):format(
 			back_w + 0.2, tabsize.height + 0.2, checkbox_w),
@@ -534,7 +531,6 @@ local function get_formspec(dialogdata)
 		"field[0.25,0.25;", tostring(search_width), ",0.75;search_query;;",
 			core.formspec_escape(dialogdata.query or ""), "]",
 		"field_enter_after_edit[search_query;true]",
-		"field_close_on_enter[search_query;false]", -- for pause menu env
 		"container[", tostring(search_width + 0.25), ", 0.25]",
 			"image_button[0,0;0.75,0.75;", core.formspec_escape(defaulttexturedir .. "search.png"), ";search;]",
 			"image_button[0.75,0;0.75,0.75;", core.formspec_escape(defaulttexturedir .. "clear.png"), ";search_clear;]",
@@ -675,8 +671,7 @@ local function buttonhandler(this, fields)
 	dialogdata.rightscroll = core.explode_scrollbar_event(fields.rightscroll).value or dialogdata.rightscroll
 	dialogdata.query = fields.search_query
 
-	-- "fields.quit" is for the pause menu env
-	if fields.back or fields.quit then
+	if fields.back then
 		this:delete()
 		return true
 	end
@@ -770,44 +765,11 @@ local function eventhandler(event)
 end
 
 
-if INIT == "mainmenu" then
-	function create_settings_dlg()
-		load()
-		local dlg = dialog_create("dlg_settings", get_formspec, buttonhandler, eventhandler)
+function create_settings_dlg()
+	load()
+	local dlg = dialog_create("dlg_settings", get_formspec, buttonhandler, eventhandler)
 
-		dlg.data.page_id = update_filtered_pages("")
+	dlg.data.page_id = update_filtered_pages("")
 
-		return dlg
-	end
-
-else
-	assert(INIT == "pause_menu")
-
-	local dialog
-
-	core.register_on_formspec_input(function(formname, fields)
-		if dialog and formname == "__builtin:settings" then
-			-- buttonhandler returning true means we should update the formspec.
-			-- dialog is re-checked since the buttonhandler may have closed it.
-			if buttonhandler(dialog, fields) and dialog then
-				core.show_formspec("__builtin:settings", get_formspec(dialog.data))
-			end
-			return true
-		end
-	end)
-
-	core.open_settings = function()
-		load()
-		dialog = {}
-		dialog.data = {}
-		dialog.data.page_id = update_filtered_pages("")
-		dialog.delete = function()
-			dialog = nil
-			-- only needed for the "fields.back" case, in the "fields.quit"
-			-- case it's a no-op
-			core.show_formspec("__builtin:settings", "")
-		end
-
-		core.show_formspec("__builtin:settings", get_formspec(dialog.data))
-	end
+	return dlg
 end

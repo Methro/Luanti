@@ -1311,7 +1311,7 @@ void CNullDriver::runOcclusionQuery(scene::ISceneNode *node, bool visible)
 	OcclusionQueries[index].Run = 0;
 	if (!visible) {
 		SMaterial mat;
-		mat.AntiAliasing = video::EAAM_OFF;
+		mat.AntiAliasing = 0;
 		mat.ColorMask = ECP_NONE;
 		mat.ZWriteEnable = EZW_OFF;
 		setMaterial(mat);

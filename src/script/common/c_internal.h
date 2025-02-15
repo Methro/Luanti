@@ -19,7 +19,7 @@ extern "C" {
 }
 
 #include "config.h"
-#include "util/enum_string.h"
+#include "common/c_types.h"
 
 
 /*

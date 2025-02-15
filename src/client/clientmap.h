@@ -36,16 +36,6 @@ namespace irr::video
 	class IVideoDriver;
 }
 
-struct CachedMeshBuffer {
-	std::vector<scene::IMeshBuffer*> buf;
-	u8 age = 0;
-
-	void drop();
-};
-
-using CachedMeshBuffers = std::unordered_map<std::string, CachedMeshBuffer>;
-
-
 /*
 	ClientMap
 
@@ -105,8 +95,6 @@ public:
 
 	void renderPostFx(CameraMode cam_mode);
 
-	void invalidateMapBlockMesh(MapBlockMesh *mesh);
-
 	// For debug printing
 	void PrintInfo(std::ostream &out) override;
 
@@ -163,7 +151,6 @@ private:
 	std::vector<MapBlock*> m_keeplist;
 	std::map<v3s16, MapBlock*> m_drawlist_shadow;
 	bool m_needs_update_drawlist;
-	CachedMeshBuffers m_dynamic_buffers;
 
 	bool m_cache_trilinear_filter;
 	bool m_cache_bilinear_filter;

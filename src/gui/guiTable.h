@@ -8,7 +8,9 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <iostream>
 
+#include "irrlichttypes_extrabloated.h"
 #include "guiScrollBar.h"
 
 class ISimpleTextureSource;

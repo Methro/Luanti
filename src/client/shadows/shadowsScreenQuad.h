@@ -3,6 +3,7 @@
 // Copyright (C) 2021 Liso <anlismon@gmail.com>
 
 #pragma once
+#include "irrlichttypes_extrabloated.h"
 #include <IMaterialRendererServices.h>
 #include <IShaderConstantSetCallBack.h>
 #include "client/shader.h"
