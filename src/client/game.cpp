@@ -976,7 +976,7 @@ void Game::run()
 		// Calculate dtime =
 		//    m_rendering_engine->run() from this iteration
 		//  + Sleep time until the wanted FPS are reached
-		draw_times.limit(device, &dtime, g_menumgr.pausesGame());
+		draw_times.limit(device, &dtime);
 
 		framemarker.start();
 
