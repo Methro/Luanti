@@ -75,18 +75,17 @@ void MeshMakeData::fillSingleNode(MapNode data, MapNode padding)
 		m_vmanip.m_flags[i] &= ~VOXELFLAG_NO_DATA;
 	}
 
-	m_vmanip.setNodeNoEmerge({0, 0, 0}, data);
-}
-
 void MeshMakeData::setSmoothLighting(bool smooth_lighting)
 {
 
 	m_smooth_lighting = smooth_lighting && !g_settings->getBool("fullbright");
 }
 
+	m_vmanip.setNodeNoEmerge({0, 0, 0}, data);
+}
+
 void MeshMakeData::setCrack(int crack_level, v3s16 crack_pos)
 {
-
 	if (crack_level >= 0)
 		m_crack_pos_relative = crack_pos - m_blockpos*MAP_BLOCKSIZE;
 }
@@ -102,13 +101,9 @@ void MeshMakeData::setCrack(int crack_level, v3s16 crack_pos)
 static u8 getInteriorLight(enum LightBank bank, MapNode n, s32 increment,
 	const NodeDefManager *ndef)
 {
-
-if (g_settings->getBool("fullbright"))
-	return 255;
-
 	u8 light = n.getLight(bank, ndef->getLightingFlags(n));
 	light = rangelim(light + increment, 0, LIGHT_SUN);
-		return decode_light(light);
+	return decode_light(light);
 }
 
 /*
@@ -117,9 +112,13 @@ if (g_settings->getBool("fullbright"))
 */
 u16 getInteriorLight(MapNode n, s32 increment, const NodeDefManager *ndef)
 {
-	u16 day = getInteriorLight(LIGHTBANK_DAY, n, increment, ndef);
-	u16 night = getInteriorLight(LIGHTBANK_NIGHT, n, increment, ndef);
-	return day | (night << 8);
+	if (g_settings->getBool("fullbright"))
+	return 255;
+
+	u8 light = n.getLight(bank, ndef->getLightingFlags(n));
+	light = rangelim(light + increment, 0, LIGHT_SUN);
+		return decode_light(light);
+	
 }
 
 /*
