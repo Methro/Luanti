@@ -11,16 +11,19 @@ set(CLANG_MINIMUM_VERSION "7.0.1")
 
 # You should not need to edit these manually, use util/bump_version.sh
 set(VERSION_MAJOR 5)
-set(VERSION_MINOR 11)
+set(VERSION_MINOR 12)
 set(VERSION_PATCH 0)
 set(VERSION_EXTRA "" CACHE STRING "Stuff to append to version string")
 
 # Change to false for releases
-##set(DEVELOPMENT_BUILD TRUE)
+set(DEVELOPMENT_BUILD TRUE)
 
 set(VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
-set(VERSION_STRING "${VERSION_STRING}-dev")
-
+if(VERSION_EXTRA)
+	set(VERSION_STRING "${VERSION_STRING}-${VERSION_EXTRA}")
+elseif(DEVELOPMENT_BUILD)
+	set(VERSION_STRING "${VERSION_STRING}-dev")
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
 	# Append "-debug" to version string
@@ -45,7 +48,7 @@ endif()
 # - win32/gcc: fails to link
 # - win32/clang: works
 # - macOS on x86: seems to be fine
-# - macOS on ARM: crashes, see <https://github.com/minetest/minetest/issues/14397>
+# - macOS on ARM: crashes, see <https://github.com/luanti-org/luanti/issues/14397>
 # Note: since CMake has no easy architecture detection disabling for Mac entirely
 #### ####
 if((WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR APPLE)

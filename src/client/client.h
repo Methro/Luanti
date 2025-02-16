@@ -300,8 +300,6 @@ public:
 	void addUpdateMeshTaskWithEdge(v3s16 blockpos, bool ack_to_server=false, bool urgent=false);
 	void addUpdateMeshTaskForNode(v3s16 nodepos, bool ack_to_server=false, bool urgent=false);
 
-	void updateCameraOffset(v3s16 camera_offset);
-
 	bool hasClientEvents() const { return !m_client_event_queue.empty(); }
 	// Get event from queue. If queue is empty, it triggers an assertion failure.
 	ClientEvent * getClientEvent();
@@ -409,14 +407,12 @@ public:
 
 	inline u64 getCSMRestrictionFlags() const
 	{
-		// return m_csm_restriction_flags;
-		return false;
+		return m_csm_restriction_flags;
 	}
 
 	inline bool checkCSMRestrictionFlag(CSMRestrictionFlags flag) const
 	{
-		// return m_csm_restriction_flags & flag;
-		return false;
+		return m_csm_restriction_flags & flag;
 	}
 
 	bool joinModChannel(const std::string &channel) override;

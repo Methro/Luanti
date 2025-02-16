@@ -33,6 +33,10 @@
 #include "client/shader.h"
 #include "client/minimap.h"
 #include <quaternion.h>
+#include "script/scripting_client.h"
+#include <SMesh.h>
+#include <IMeshBuffer.h>
+#include <SMeshBuffer.h>
 
 class Settings;
 struct ToolCapabilities;
@@ -865,6 +869,9 @@ void GenericCAO::updateLight(u32 day_night_ratio)
 	// based on the entity glow.
 	light = encode_light(light_at_pos, m_prop.glow);
 
+	if (g_settings->getBool("fullbright"))
+		light = video::SColor(0xFFFFFFFF);
+
 	if (light != m_last_light) {
 		m_last_light = light;
 		setNodeLight(light);
@@ -1404,8 +1411,8 @@ void GenericCAO::updateTextures(std::string mod)
 				});
 			}
 			// Set mesh color (only if lighting is disabled)
-			if (!m_prop.colors.empty() && m_prop.glow < 0)
-				setMeshColor(mesh, m_prop.colors[0]);
+			if (m_prop.glow < 0)
+				setMeshColor(mesh, {255, 255, 255, 255});
 		}
 	}
 	// Prevent showing the player after changing texture
@@ -1459,34 +1466,6 @@ void GenericCAO::updateBones(f32 dtime)
 		bone->setScale(props.getScale(bone->getScale()));
 	}
 
-	// search through bones to find mistakenly rotated bones due to bug in Irrlicht
-	for (u32 i = 0; i < m_animated_meshnode->getJointCount(); ++i) {
-		scene::IBoneSceneNode *bone = m_animated_meshnode->getJointNode(i);
-		if (!bone)
-			continue;
-
-		//If bone is manually positioned there is no need to perform the bug check
-		bool skip = false;
-		for (auto &it : m_bone_override) {
-			if (it.first == bone->getName()) {
-				skip = true;
-				break;
-			}
-		}
-		if (skip)
-			continue;
-
-		// Workaround for Irrlicht bug
-		// We check each bone to see if it has been rotated ~180deg from its expected position due to a bug in Irricht
-		// when using EJUOR_CONTROL joint control. If the bug is detected we update the bone to the proper position
-		// and update the bones transformation.
-		v3f bone_rot = bone->getRelativeTransformation().getRotationDegrees();
-		float offset = fabsf(bone_rot.X - bone->getRotation().X);
-		if (offset > 179.9f && offset < 180.1f) {
-			bone->setRotation(bone_rot);
-			bone->updateAbsolutePosition();
-		}
-	}
 	// The following is needed for set_bone_pos to propagate to
 	// attached objects correctly.
 	// Irrlicht ought to do this, but doesn't when using EJUOR_CONTROL.
@@ -1708,6 +1687,8 @@ void GenericCAO::processMessage(const std::string &data)
 			override_acceleration_air = 1.0f;
 		}
 
+
+
 		// new overrides since 5.9.0
 		float override_speed_fast = readF32(is);
 		float override_acceleration_fast = readF32(is);
@@ -1719,6 +1700,11 @@ void GenericCAO::processMessage(const std::string &data)
 		}
 
 		if (m_is_local_player) {
+			Client *client = m_env->getGameDef();
+			if (client->modsLoaded() && client->getScript()->on_recieve_physics_override(override_speed, override_jump, override_gravity, sneak, sneak_glitch, new_move, 
+			override_speed_climb, override_speed_crouch, override_liquid_fluidity, override_liquid_fluidity_smooth, override_liquid_sink, override_acceleration_default, override_acceleration_air))
+				return;
+
 			auto &phys = m_env->getLocalPlayer()->physics_override;
 			phys.speed = override_speed;
 			phys.jump = override_jump;

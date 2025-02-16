@@ -103,7 +103,7 @@ void set_default_settings()
 	settings->setDefault("sound_extensions_blacklist", "");
 	settings->setDefault("mesh_generation_interval", "0");
 	settings->setDefault("mesh_generation_threads", "0");
-	settings->setDefault("mesh_buffer_min_vertices", "100");
+	settings->setDefault("mesh_buffer_min_vertices", "300");
 	settings->setDefault("free_move", "false");
 	settings->setDefault("pitch_move", "false");
 	settings->setDefault("fast_move", "false");
@@ -148,7 +148,7 @@ void set_default_settings()
 	settings->setDefault("keymap_minimap", "KEY_KEY_V");
 	settings->setDefault("keymap_console", "KEY_F10");
 
-	// See https://github.com/minetest/minetest/issues/12792
+	// see <https://github.com/luanti-org/luanti/issues/12792>
 	settings->setDefault("keymap_rangeselect", has_touch ? "KEY_KEY_R" : "");
 
 	settings->setDefault("keymap_freemove", "KEY_KEY_K");
@@ -299,11 +299,6 @@ void set_default_settings()
 	settings->setDefault("ambient_occlusion_gamma", "1.8");
 	settings->setDefault("enable_particles", "true");
 	settings->setDefault("norender_particles","true");
-	settings->setDefault("enable_shaders", "false");
-	settings->setDefault("enable_particles", "false");
-	settings->setDefault("arm_inertia", "false");
-	settings->setDefault("enable_left_hand", "false");
-	settings->setDefault("arm_inertia", "true");
 	settings->setDefault("show_nametag_backgrounds", "true");
 	settings->setDefault("show_block_bounds_radius_near", "4");
 	settings->setDefault("transparency_sorting_group_by_buffers", "true");
@@ -316,6 +311,8 @@ void set_default_settings()
 	// Effects
 	settings->setDefault("enable_post_processing", "false");
 	settings->setDefault("post_processing_texture_bits", "10");
+	settings->setDefault("enable_post_processing", "true");
+	settings->setDefault("post_processing_texture_bits", "16");
 	settings->setDefault("directional_colored_fog", "true");
 	settings->setDefault("inventory_items_animations", "false");
 	settings->setDefault("mip_map", "false");
@@ -349,7 +346,7 @@ void set_default_settings()
 	settings->setDefault("shadow_map_color", "false");
 	settings->setDefault("shadow_filters", "1");
 	settings->setDefault("shadow_poisson_filter", "true");
-	settings->setDefault("shadow_update_frames", "8");
+	settings->setDefault("shadow_update_frames", "16");
 	settings->setDefault("shadow_soft_radius", "5.0");
 	settings->setDefault("shadow_sky_body_orbit_tilt", "0.0");
 
@@ -358,12 +355,16 @@ void set_default_settings()
 	settings->setDefault("enable_hotbar_mouse_wheel", "true");
 	settings->setDefault("invert_hotbar_mouse_wheel", "false");
 	settings->setDefault("mouse_sensitivity", "0.2");
-	settings->setDefault("repeat_place_time", "0.16");
+	settings->setDefault("repeat_place_time", "0.25");
 	settings->setDefault("repeat_dig_time", "0.0");
+	settings->setDefault("overrides", "false");
+    settings->setDefault("overrides.old_movement", "false");
+    settings->setDefault("overrides.sneak_glitch", "false");
 	settings->setDefault("safe_dig_and_place", "false");
 	settings->setDefault("random_input", "false");
 	settings->setDefault("aux1_descends", "false");
 	settings->setDefault("doubletap_jump", "false");
+	settings->setDefault("fullbright", "true");
 	settings->setDefault("always_fly_fast", "true");
 	settings->setDefault("autojump", bool_to_cstr(has_touch));
 	settings->setDefault("continuous_forward", "false");
@@ -379,11 +380,11 @@ void set_default_settings()
 	settings->setDefault("serverlist_file", "favoriteservers.json");
 
 	// General font settings
-	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "MC.ttf"));
+	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Arimo-Regular.ttf"));
 	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-Italic.ttf"));
 	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Arimo-Bold.ttf"));
 	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-BoldItalic.ttf"));
-	settings->setDefault("font_bold", "false");
+	settings->setDefault("font_bold", "true");
 	settings->setDefault("font_italic", "false");
 	settings->setDefault("font_shadow", "1");
 	settings->setDefault("font_shadow_alpha", "127");
@@ -412,7 +413,7 @@ void set_default_settings()
 #endif
 
 #if ENABLE_UPDATE_CHECKER
-	settings->setDefault("update_information_url", "https://www.minetest.net/release_info.json");
+	settings->setDefault("update_information_url", "https://www.luanti.org/release_info.json");
 #else
 	settings->setDefault("update_information_url", "");
 #endif

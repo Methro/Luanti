@@ -161,6 +161,26 @@ local function get_formspec(tabview, name, tabdata)
 				core.formspec_escape(gamedata.serverdescription) .. "]"
 		end
 
+		-- Mods button
+		local mods = selected_server.mods
+		if mods and #mods > 0 then
+			local tooltip = ""
+			if selected_server.gameid then
+				tooltip = fgettext("Game: $1", selected_server.gameid) .. "\n"
+			end
+			tooltip = tooltip .. fgettext("Number of mods: $1", #mods)
+
+			retval = retval ..
+				"tooltip[btn_view_mods;" .. tooltip .. "]" ..
+				"style[btn_view_mods;padding=6]" ..
+				"image_button[4,1.3;0.5,0.5;" .. core.formspec_escape(defaulttexturedir ..
+				"server_view_mods.png") .. ";btn_view_mods;]"
+		else
+			retval = retval .. "image[4.1,1.4;0.3,0.3;" .. core.formspec_escape(defaulttexturedir ..
+				"server_view_mods_unavailable.png") .. "]"
+		end
+
+		-- Clients list button
 		local clients_list = selected_server.clients_list
 		local can_view_clients_list = clients_list and #clients_list > 0
 		if can_view_clients_list then
@@ -170,23 +190,31 @@ local function get_formspec(tabview, name, tabdata)
 			local max_clients = 5
 			if #clients_list > max_clients then
 				retval = retval .. "tooltip[btn_view_clients;" ..
-						fgettext("Clients:\n$1", table.concat(clients_list, "\n", 1, max_clients)) .. "\n..." .. "]"
+						fgettext("Players:\n$1", table.concat(clients_list, "\n", 1, max_clients)) .. "\n..." .. "]"
 			else
 				retval = retval .. "tooltip[btn_view_clients;" ..
-						fgettext("Clients:\n$1", table.concat(clients_list, "\n")) .. "]"
+						fgettext("Players:\n$1", table.concat(clients_list, "\n")) .. "]"
 			end
 			retval = retval .. "style[btn_view_clients;padding=6]"
 			retval = retval .. "image_button[4.5,1.3;0.5,0.5;" .. core.formspec_escape(defaulttexturedir ..
 				"server_view_clients.png") .. ";btn_view_clients;]"
+		else
+			retval = retval .. "image[4.6,1.4;0.3,0.3;" .. core.formspec_escape(defaulttexturedir ..
+				"server_view_clients_unavailable.png") .. "]"
 		end
 
+		-- URL button
 		if selected_server.url then
 			retval = retval .. "tooltip[btn_server_url;" .. fgettext("Open server website") .. "]"
 			retval = retval .. "style[btn_server_url;padding=6]"
-			retval = retval .. "image_button[" .. (can_view_clients_list and "4" or "4.5") .. ",1.3;0.5,0.5;" ..
+			retval = retval .. "image_button[3.5,1.3;0.5,0.5;" ..
 				core.formspec_escape(defaulttexturedir .. "server_url.png") .. ";btn_server_url;]"
+		else
+			retval = retval .. "image[3.6,1.4;0.3,0.3;" .. core.formspec_escape(defaulttexturedir ..
+				"server_url_unavailable.png") .. "]"
 		end
 
+		-- Favorites toggle button
 		if is_selected_fav() then
 			retval = retval .. "tooltip[btn_delete_favorite;" .. fgettext("Remove favorite") .. "]"
 			retval = retval .. "style[btn_delete_favorite;padding=6]"
@@ -363,11 +391,14 @@ local function matches_query(server, query)
 	return name_matches and 50 or description_matches and 0
 end
 
-local function search_server_list(input)
+local function search_server_list(input, tabdata)
 	menudata.search_result = nil
 	if #serverlistmgr.servers < 2 then
 		return
 	end
+
+
+	tabdata.pre_search_selection = tabdata.pre_search_selection or find_selected_server()
 
 	-- setup the search query
 	local query = parse_search_input(input)
@@ -391,10 +422,32 @@ local function search_server_list(input)
 		return
 	end
 
+	local current_server = find_selected_server()
+
 	table.sort(search_result, function(a, b)
 		return a.points > b.points
 	end)
 	menudata.search_result = search_result
+
+	-- Keep current selection if it's in search results
+	if current_server then
+	    for _, server in ipairs(search_result) do
+			if server.address == current_server.address and
+					server.port == current_server.port then
+				return
+			end
+		end
+	end
+
+	-- Find first compatible server (favorite or public)
+	for _, server in ipairs(search_result) do
+		if is_server_protocol_compat(server.proto_min, server.proto_max) then
+			set_selected_server(server)
+			return
+		end
+	end
+	-- If no compatible server found, clear selection
+	set_selected_server(nil)
 end
 
 local function main_button_handler(tabview, fields, name, tabdata)
@@ -434,6 +487,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 			end
 			if event.type == "CHG" then
 				set_selected_server(server)
+				tabdata.pre_search_selection = nil
 				return true
 			end
 		end
@@ -447,11 +501,9 @@ local function main_button_handler(tabview, fields, name, tabdata)
 	if fields.btn_delete_favorite then
 		local idx = core.get_table_index("servers")
 		if not idx then return end
-		local server = tabdata.lookup[idx]
-		if not server then return end
 
-		serverlistmgr.delete_favorite(server)
-		set_selected_server(server)
+		serverlistmgr.delete_favorite(tabdata.lookup[idx])
+		set_selected_server(tabdata.lookup[idx+1])
 		return true
 	end
 
@@ -468,20 +520,27 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		return true
 	end
 
+	if fields.btn_view_mods then
+		local dlg = create_server_list_mods_dialog(find_selected_server())
+		dlg:set_parent(tabview)
+		tabview:hide()
+		dlg:show()
+		return true
+	end
+
 	if fields.btn_mp_clear then
 		tabdata.search_for = ""
 		menudata.search_result = nil
+		if tabdata.pre_search_selection then
+			set_selected_server(tabdata.pre_search_selection)
+			tabdata.pre_search_selection = nil
+		end
 		return true
 	end
 
 	if fields.btn_mp_search or fields.key_enter_field == "te_search" then
 		tabdata.search_for = fields.te_search
-		search_server_list(fields.te_search)
-		if menudata.search_result then
-			-- Note: This clears the selection if there are no results
-			set_selected_server(menudata.search_result[1])
-		end
-
+		search_server_list(fields.te_search, tabdata)
 		return true
 	end
 

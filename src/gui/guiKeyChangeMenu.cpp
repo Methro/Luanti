@@ -7,7 +7,6 @@
 #include "guiKeyChangeMenu.h"
 #include "debug.h"
 #include "guiButton.h"
-#include "serialization.h"
 #include <string>
 #include <IGUICheckBox.h>
 #include <IGUIEditBox.h>
@@ -16,7 +15,7 @@
 #include <IGUIFont.h>
 #include <IVideoDriver.h>
 #include "settings.h"
-#include <algorithm>
+#include "gettext.h"
 
 #include "mainmenumanager.h"  // for g_gamecallback
 
@@ -66,7 +65,6 @@ enum
 	GUI_ID_CB_AUX1_DESCENDS,
 	GUI_ID_CB_DOUBLETAP_JUMP,
 	GUI_ID_CB_AUTOJUMP,
-	GUI_ID_CB_FULLBRIGHT,
 };
 
 GUIKeyChangeMenu::GUIKeyChangeMenu(gui::IGUIEnvironment* env,
@@ -179,19 +177,6 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	}
 
 	{
-		s32 option_x = offset.X;
-		s32 option_y = offset.Y + 5 * s;
-		u32 option_w = 280;
-		{
-			core::rect<s32> rect(0, 0, option_w, 30 * s);
-			rect += topleft + v2s32(option_x, option_y);
-			Environment->addCheckBox(g_settings->getBool("fullbright"), rect, this,
-					GUI_ID_CB_FULLBRIGHT, L"Light");
-		}
-		offset += v2s32(0, 25);
-	}
-
-	{
 		core::rect<s32> rect(0, 0, 100 * s, 30 * s);
 		rect += topleft + v2s32(size.X / 2 - 105 * s, size.Y - 40 * s);
 		GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_BACK_BUTTON,
@@ -244,12 +229,6 @@ bool GUIKeyChangeMenu::acceptInput()
 		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_AUTOJUMP);
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
 			g_settings->setBool("autojump", ((gui::IGUICheckBox*)e)->isChecked());
-	}
-
-	{
-		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_FULLBRIGHT);
-		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
-			g_settings->setBool("fullbright", ((gui::IGUICheckBox*)e)->isChecked());
 	}
 
 	clearKeyCache();

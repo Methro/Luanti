@@ -256,8 +256,8 @@ fps_max (Maximum FPS) int 60 1 4294967295
 #    Vertical screen synchronization. Your system may still force VSync on even if this is disabled.
 vsync (VSync) bool false
 
-#    Maximum FPS when the window is not focused, or when the game is paused.
-fps_max_unfocused (FPS when unfocused or paused) int 20 1 4294967295
+#    Maximum FPS when the window is not focused.
+fps_max_unfocused (FPS when unfocused) int 10 1 4294967295
 
 #    View distance in nodes.
 viewing_range (Viewing range) int 190 20 4000
@@ -298,12 +298,6 @@ view_bobbing_amount (View bobbing factor) float 1.0 0.0 7.9
 #    Multiplier for fall bobbing.
 #    For example: 0 for no view bobbing; 1.0 for normal; 2.0 for double.
 fall_bobbing_amount (Fall bobbing factor) float 0.03 0.0 100.0
-
-# Disabling arm movement animation when walking, climbing, falling, swimming.
-# For example: true means no arm movement in those scenarios while disabling it is the opposite
-
-disable_view_bobbing (Disable arm bobbing) bool false
-
 
 [**Camera]
 
@@ -382,12 +376,6 @@ directional_colored_fog (Colored fog) bool true
 fog_start (Fog start) float 0.4 0.0 0.99
 
 [**Clouds]
-
-#    Clouds are a client-side effect.
-enable_clouds (Clouds) bool true
-#    Use 3D cloud look instead of flat.
-#
-#    Requires: enable_clouds
 
 #    Allow clouds to look 3D instead of flat.
 enable_3d_clouds (3D clouds) bool true
@@ -479,11 +467,6 @@ smooth_lighting (Smooth lighting) bool true
 #    at the expense of minor visual glitches that do not impact game playability.
 performance_tradeoffs (Tradeoffs for performance) bool false
 
-#    Adds particles when digging a node.
-enable_particles (Digging particles) bool true
-
-# Enable No Render to skip rendering particles
-norender_particles (Skip rendering particles) bool true
 
 [**Waving Nodes]
 
@@ -555,8 +538,8 @@ shadow_map_texture_32bit (Shadow map texture in 32 bits) bool true
 #    Requires: enable_dynamic_shadows, opengl
 shadow_filters (Shadow filter quality) enum 1 0,1,2
 
-#    Enable colored shadows.
-#    On true translucent nodes cast colored shadows. This is expensive.
+#    Enable colored shadows for transculent nodes.
+#    This is expensive.
 #
 #    Requires: enable_dynamic_shadows, opengl
 shadow_map_color (Colored shadows) bool false
@@ -716,9 +699,6 @@ show_debug (Show debug info) bool false
 #    Radius to use when the block bounds HUD feature is set to near blocks.
 show_block_bounds_radius_near (Block bounds HUD radius) int 4 0 1000
 
-#    Enables left-hand mode for wielded items in the HUD.
-enable_left_hand (Enable Left-Hand Mode) bool false
-
 #    Maximum proportion of current window to be used for hotbar.
 #    Useful if there's something to be displayed right or left of hotbar.
 hud_hotbar_max_width (Maximum hotbar width) float 1.0 0.001 1.0
@@ -780,18 +760,18 @@ enable_local_map_saving (Saving map received from server) bool false
 #    URL to the server list displayed in the Multiplayer Tab.
 serverlist_url (Serverlist URL) string https://servers.luanti.org
 
-#    If enabled, account registration is separate from login in the UI.
-#    If disabled, new accounts will be registered automatically when logging in.
+#    If enabled, server account registration is separate from login in the UI.
+#    If disabled, connecting to a server will automatically register a new account.
 enable_split_login_register (Enable split login/register) bool true
 
 #    URL to JSON file which provides information about the newest Luanti release.
 #    If this is empty the engine will never check for updates.
-update_information_url (Update information URL) string https://www.minetest.net/release_info.json
+update_information_url (Update information URL) string https://www.luanti.org/release_info.json
 
 [*Server]
 
 #    Name of the player.
-#    When running a server, clients connecting with this name are admins.
+#    When running a server, a client connecting with this name is admin.
 #    When starting from the main menu, this is overridden.
 name (Admin name) string
 
@@ -855,10 +835,12 @@ protocol_version_min (Protocol version minimum) int 1 1 65535
 #    Files that are not present will be fetched the usual way.
 remote_media (Remote media) string
 
-#    Enable/disable running an IPv6 server.
+#    Enable IPv6 support for server.
+#    Note that clients will be able to connect with both IPv4 and IPv6.
 #    Ignored if bind_address is set.
-#    Needs enable_ipv6 to be enabled.
-ipv6_server (IPv6 server) bool false
+#
+#    Requires: enable_ipv6
+ipv6_server (IPv6 server) bool true
 
 [*Server Security]
 
@@ -1861,7 +1843,7 @@ mesh_generation_threads (Mapblock mesh generation threads) int 0 0 8
 
 #    All mesh buffers with less than this number of vertices will be merged
 #    during map rendering. This improves rendering performance.
-mesh_buffer_min_vertices (Minimum vertex count for mesh buffers) int 100 0 1000
+mesh_buffer_min_vertices (Minimum vertex count for mesh buffers) int 300 0 1000
 
 #    True = 256
 #    False = 128
@@ -1901,8 +1883,8 @@ texture_min_size (Base texture size) int 64 1 32768
 client_mesh_chunk (Client Mesh Chunksize) int 1 1 16
 
 #    Decide the color depth of the texture used for the post-processing pipeline.
-#    Reducing this can improve performance, but might cause some effects (e.g. bloom)
-#    to not work.
+#    Reducing this can improve performance, but some effects (e.g. debanding)
+#    require more than 8 bits to work.
 #
 #    Requires: enable_post_processing
 post_processing_texture_bits (Color depth for post-processing texture) enum 16 8,10,16
@@ -1913,13 +1895,12 @@ post_processing_texture_bits (Color depth for post-processing texture) enum 16 8
 #    Requires: enable_dynamic_shadows, opengl
 shadow_poisson_filter (Poisson filtering) bool true
 
-#    Spread a complete update of shadow map over given number of frames.
+#    Spread a complete update of the shadow map over a given number of frames.
 #    Higher values might make shadows laggy, lower values
 #    will consume more resources.
-#    Minimum value: 1; maximum value: 16
 #
 #    Requires: enable_dynamic_shadows, opengl
-shadow_update_frames (Map shadows update frames) int 8 1 16
+shadow_update_frames (Map shadows update frames) int 16 1 32
 
 #    Set to true to render debugging breakdown of the bloom effect.
 #    In debug mode, the screen is split into 4 quadrants:
@@ -1957,7 +1938,7 @@ font_size_divisible_by (Font size divisible by) int 1 1
 
 #    Path to the default font. Must be a TrueType font.
 #    The fallback font will be used if the font cannot be loaded.
-font_path (Regular font path) filepath fonts/Arimo-MC.ttf
+font_path (Regular font path) filepath fonts/Arimo-Regular.ttf
 
 font_path_bold (Bold font path) filepath fonts/Arimo-Bold.ttf
 font_path_italic (Italic font path) filepath fonts/Arimo-Italic.ttf
@@ -2349,9 +2330,6 @@ keymap_jump (Jump key) key KEY_SPACE
 #    Key for sneaking.
 #    Also used for climbing down and descending in water if aux1_descends is disabled.
 keymap_sneak (Sneak key) key KEY_LSHIFT
-
-#    Key for Toggle Sneak.
-keymap_toggle_sneak (Toggle Sneak key) key
 
 #    Key for digging, punching or using something.
 #    (Note: The actual meaning might vary on a per-game basis.)

@@ -105,7 +105,7 @@ struct PlayerPhysicsOverride
 	float gravity = 1.f;
 
 	bool sneak = true;
-	bool sneak_glitch = true;
+	bool sneak_glitch = false;
 	// "Temporary" option for old move code
 	bool new_move = true;
 

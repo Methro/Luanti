@@ -11,6 +11,7 @@
 #include "client/hud.h"
 #include "client/minimap.h"
 #include "client/shadows/dynamicshadowsrender.h"
+#include <IGUIEnvironment.h>
 
 /// Draw3D pipeline step
 void Draw3D::run(PipelineContext &context)
@@ -100,8 +101,7 @@ std::unique_ptr<RenderStep> create3DStage(Client *client, v2f scale)
 
 static v2f getDownscaleFactor()
 {
-	float undersampling = static_cast<float>(g_settings->getU16("undersampling"));
-	undersampling = MYMAX(undersampling, 1.0f);
+	u16 undersampling = MYMAX(g_settings->getU16("undersampling"), 1);
 	return v2f(1.0f / undersampling);
 }
 

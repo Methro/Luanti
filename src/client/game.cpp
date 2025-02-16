@@ -564,6 +564,7 @@ protected:
 	void updatePauseState();
 	void step(f32 dtime);
 	void processClientEvents(CameraOrientation *cam);
+	void updateCameraOffset();
 	void updateCamera(f32 dtime);
 	void updateSound(f32 dtime);
 	void processPlayerInteraction(f32 dtime, bool show_hud);
@@ -650,7 +651,8 @@ private:
 	void handleClientEvent_PlayerForceMove(ClientEvent *event, CameraOrientation *cam);
 	void handleClientEvent_DeathscreenLegacy(ClientEvent *event, CameraOrientation *cam);
 	void handleClientEvent_ShowFormSpec(ClientEvent *event, CameraOrientation *cam);
-	void handleClientEvent_ShowLocalFormSpec(ClientEvent *event, CameraOrientation *cam);
+	void handleClientEvent_ShowCSMFormSpec(ClientEvent *event, CameraOrientation *cam);
+	void handleClientEvent_ShowPauseMenuFormSpec(ClientEvent *event, CameraOrientation *cam);
 	void handleClientEvent_HandleParticleEvent(ClientEvent *event,
 		CameraOrientation *cam);
 	void handleClientEvent_HudAdd(ClientEvent *event, CameraOrientation *cam);
@@ -754,6 +756,7 @@ private:
 	f32  m_repeat_dig_time;
 	f32  m_cache_cam_smoothing;
 
+	bool m_enable_relative_mode = false;
 	bool m_invert_mouse;
 	bool m_enable_hotbar_mouse_wheel;
 	bool m_invert_hotbar_mouse_wheel;
@@ -904,7 +907,14 @@ bool Game::startup(bool *kill,
 
 	m_first_loop_after_window_activation = true;
 
-	m_touch_use_crosshair = g_settings->getBool("touch_use_crosshair");
+	// In principle we could always enable relative mouse mode, but it causes weird
+	// bugs on some setups (e.g. #14932), so we enable it only when it's required.
+	// That is: on Wayland or Android, because it does not support mouse repositioning
+#ifdef __ANDROID__
+	m_enable_relative_mode = true;
+#else
+	m_enable_relative_mode = device->isUsingWayland();
+#endif
 
 	g_client_translations->clear();
 
@@ -998,6 +1008,12 @@ void Game::run()
 		m_game_ui->clearInfoText();
 
 		updateProfilers(stats, draw_times, dtime);
+
+		// Update camera offset once before doing anything.
+		// In contrast to other updates the latency of this doesn't matter,
+		// since it's invisible to the user. But it needs to be consistent.
+		updateCameraOffset();
+
 		processUserInput(dtime);
 		// Update camera before player movement to avoid camera lag of one frame
 		updateCameraDirection(&cam_view_target, dtime);
@@ -1015,6 +1031,7 @@ void Game::run()
 
 		processClientEvents(&cam_view_target);
 		updateDebugState();
+		// Update camera here so it is in-sync with CAO position
 		updateCamera(dtime);
 		updateSound(dtime);
 		processPlayerInteraction(dtime, m_game_ui->m_flags.show_hud);
@@ -1810,7 +1827,9 @@ void Game::processUserInput(f32 dtime)
 		m_game_focused = true;
 	}
 
-	if (!guienv->hasFocus(gui_chat_console.get()) && gui_chat_console->isOpen()) {
+	if (!guienv->hasFocus(gui_chat_console.get()) && gui_chat_console->isOpen()
+		&& !gui_chat_console->isMyChild(guienv->getFocus()))
+	{
 		gui_chat_console->closeConsoleAtOnce();
 	}
 
@@ -2349,8 +2368,10 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 	Since Minetest has its own code to synthesize mouse events from touch events,
 	this results in duplicated input. To avoid that, we don't enable relative
 	mouse mode if we're in touchscreen mode. */
-	if (cur_control)
-		cur_control->setRelativeMode(!g_touchcontrols && !isMenuActive());
+	if (cur_control) {
+		cur_control->setRelativeMode(m_enable_relative_mode &&
+			!g_touchcontrols && !isMenuActive());
+	}
 
 	if ((device->isWindowActive() && device->isWindowFocused()
 			&& !isMenuActive()) || input->isRandom()) {
@@ -2549,7 +2570,8 @@ const ClientEventHandler Game::clientEventHandler[CLIENTEVENT_MAX] = {
 	{&Game::handleClientEvent_PlayerForceMove},
 	{&Game::handleClientEvent_DeathscreenLegacy},
 	{&Game::handleClientEvent_ShowFormSpec},
-	{&Game::handleClientEvent_ShowLocalFormSpec},
+	{&Game::handleClientEvent_ShowCSMFormSpec},
+	{&Game::handleClientEvent_ShowPauseMenuFormSpec},
 	{&Game::handleClientEvent_HandleParticleEvent},
 	{&Game::handleClientEvent_HandleParticleEvent},
 	{&Game::handleClientEvent_HandleParticleEvent},
@@ -2584,6 +2606,7 @@ void Game::handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation 
 		f32 hp_max = player->getCAO() ?
 			player->getCAO()->getProperties().hp_max : PLAYER_MAX_HP_DEFAULT;
 		f32 damage_ratio = event->player_damage.amount / hp_max;
+		
 
 		/* Disable damage flash
 		 runData.damage_flash += 95.0f + 64.f * damage_ratio;
@@ -2619,9 +2642,18 @@ void Game::handleClientEvent_ShowFormSpec(ClientEvent *event, CameraOrientation 
 	delete event->show_formspec.formname;
 }
 
-void Game::handleClientEvent_ShowLocalFormSpec(ClientEvent *event, CameraOrientation *cam)
+void Game::handleClientEvent_ShowCSMFormSpec(ClientEvent *event, CameraOrientation *cam)
 {
-	m_game_formspec.showLocalFormSpec(*event->show_formspec.formspec,
+	m_game_formspec.showCSMFormSpec(*event->show_formspec.formspec,
+		*event->show_formspec.formname);
+
+	delete event->show_formspec.formspec;
+	delete event->show_formspec.formname;
+}
+
+void Game::handleClientEvent_ShowPauseMenuFormSpec(ClientEvent *event, CameraOrientation *cam)
+{
+	m_game_formspec.showPauseMenuFormSpec(*event->show_formspec.formspec,
 		*event->show_formspec.formname);
 
 	delete event->show_formspec.formspec;
@@ -2914,7 +2946,8 @@ void Game::updateChat(f32 dtime)
 
 void Game::updateCamera(f32 dtime)
 {
-	LocalPlayer *player = client->getEnv().getLocalPlayer();
+	ClientEnvironment &env = client->getEnv();
+	LocalPlayer *player = env.getLocalPlayer();
 
 	/*
 		For interaction purposes, get info about the held item
@@ -2930,8 +2963,6 @@ void Game::updateCamera(f32 dtime)
 
 	ToolCapabilities playeritem_toolcap =
 		playeritem.getToolCapabilities(itemdef_manager);
-
-	v3s16 old_camera_offset = camera->getOffset();
 
 	if (wasKeyPressed(KeyType::CAMERA_MODE)) {
 		GenericCAO *playercao = player->getCAO();
@@ -2953,32 +2984,47 @@ void Game::updateCamera(f32 dtime)
 	float full_punch_interval = playeritem_toolcap.full_punch_interval;
 	float tool_reload_ratio = runData.time_from_last_punch / full_punch_interval;
 
-	tool_reload_ratio = MYMIN(tool_reload_ratio, 1.0);
+	tool_reload_ratio = std::min(tool_reload_ratio, 1.0f);
 	camera->update(player, dtime, tool_reload_ratio);
 	camera->step(dtime);
 
-	f32 camera_fov = camera->getFovMax();
-	v3s16 camera_offset = camera->getOffset();
-
-	m_camera_offset_changed = (camera_offset != old_camera_offset);
-
 	if (!m_flags.disable_camera_update) {
-		v3f camera_position = camera->getPosition();
-		v3f camera_direction = camera->getDirection();
-
-		client->getEnv().getClientMap().updateCamera(camera_position,
-				camera_direction, camera_fov, camera_offset, player->light_color);
-
-		if (m_camera_offset_changed) {
-			client->updateCameraOffset(camera_offset);
-			client->getEnv().updateCameraOffset(camera_offset);
-
-			if (clouds)
-				clouds->updateCameraOffset(camera_offset);
-		}
+		client->getEnv().getClientMap().updateCamera(camera->getPosition(),
+			camera->getDirection(), camera->getFovMax(), camera->getOffset(),
+			player->light_color);
 	}
 }
 
+void Game::updateCameraOffset()
+{
+	ClientEnvironment &env = client->getEnv();
+
+	v3s16 old_camera_offset = camera->getOffset();
+
+	camera->updateOffset();
+
+	v3s16 camera_offset = camera->getOffset();
+
+	m_camera_offset_changed = camera_offset != old_camera_offset;
+	if (!m_camera_offset_changed)
+		return;
+
+	if (!m_flags.disable_camera_update) {
+		auto *shadow = RenderingEngine::get_shadow_renderer();
+		if (shadow)
+			shadow->getDirectionalLight().updateCameraOffset(camera);
+
+		env.getClientMap().updateCamera(camera->getPosition(),
+			camera->getDirection(), camera->getFovMax(), camera_offset,
+			env.getLocalPlayer()->light_color);
+
+		env.updateCameraOffset(camera_offset);
+		clouds->updateCameraOffset(camera_offset);
+	
+	if (clouds)
+		clouds->updateCameraOffset(camera_offset);
+	}
+}
 
 void Game::updateSound(f32 dtime)
 {
@@ -3784,8 +3830,8 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		float old_brightness = sky->getBrightness();
 		direct_brightness = client->getEnv().getClientMap()
 				.getBackgroundBrightness(MYMIN(runData.fog_range * 1.2, 60 * BS),
-					daynight_ratio, (int)(old_brightness * 255.5), &sunlight_seen)
-				    / 255.0;
+						daynight_ratio, (int)(old_brightness * 255.5), &sunlight_seen)
+				/ 255.0;
 	}
 
 	float time_of_day_smooth = runData.time_of_day_smooth;
@@ -3971,11 +4017,10 @@ void Game::updateShadows()
 	v3f light = is_day ? sky->getSunDirection() : sky->getMoonDirection();
 
 	v3f sun_pos = light * offset_constant;
-
 	shadow->getDirectionalLight().setDirection(sun_pos);
 	shadow->setTimeOfDay(in_timeofday);
 
-	shadow->getDirectionalLight().update_frustum(camera, client, m_camera_offset_changed);
+	shadow->getDirectionalLight().updateFrustum(camera, client);
 }
 
 void Game::drawScene(ProfilerGraph *graph, RunStats *stats)
@@ -4105,6 +4150,10 @@ void Game::readSettings()
 	m_invert_hotbar_mouse_wheel = g_settings->getBool("invert_hotbar_mouse_wheel");
 
 	m_does_lost_focus_pause_game = g_settings->getBool("pause_on_lost_focus");
+
+	m_touch_use_crosshair = g_settings->getBool("touch_use_crosshair");
+	if (g_touchcontrols)
+		g_touchcontrols->setUseCrosshair(!isTouchCrosshairDisabled());
 }
 
 /****************************************************************************/
