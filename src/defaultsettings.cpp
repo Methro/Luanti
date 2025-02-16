@@ -297,14 +297,11 @@ void set_default_settings()
 	settings->setDefault("enable_local_map_saving", "false");
 	settings->setDefault("show_entity_selectionbox", "false");
 	settings->setDefault("ambient_occlusion_gamma", "1.8");
-<<<<<<< HEAD
 	settings->setDefault("enable_shaders", "false");
 	settings->setDefault("enable_particles", "false");
 	settings->setDefault("arm_inertia", "false");
 	settings->setDefault("enable_left_hand", "false");
-=======
 	settings->setDefault("arm_inertia", "true");
->>>>>>> upstream/master
 	settings->setDefault("show_nametag_backgrounds", "true");
 	settings->setDefault("show_block_bounds_radius_near", "4");
 	settings->setDefault("transparency_sorting_group_by_buffers", "true");
