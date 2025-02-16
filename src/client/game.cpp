@@ -825,7 +825,7 @@ Game::Game() :
 	g_settings->registerChangedCallback("pause_on_lost_focus",
 		&settingChangedCallback, this);
 	g_settings->registerChangedCallback("fullbright",
-		&settingChangedCallback, this)
+		&settingChangedCallback, this);
 	g_settings->registerChangedCallback("touch_use_crosshair",
 			&settingChangedCallback, this);
 
