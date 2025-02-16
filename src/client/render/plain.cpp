@@ -11,6 +11,7 @@
 #include "client/hud.h"
 #include "client/minimap.h"
 #include "client/shadows/dynamicshadowsrender.h"
+#include <IGUIEnvironment.h>
 
 /// Draw3D pipeline step
 void Draw3D::run(PipelineContext &context)
@@ -155,8 +156,11 @@ void populatePlainPipeline(RenderPipeline *pipeline, Client *client)
 
 video::ECOLOR_FORMAT selectColorFormat(video::IVideoDriver *driver)
 {
-	if (driver->queryTextureFormat(video::ECF_A16B16G16R16F))
+	u32 bits = g_settings->getU32("post_processing_texture_bits");
+	if (bits >= 16 && driver->queryTextureFormat(video::ECF_A16B16G16R16F))
 		return video::ECF_A16B16G16R16F;
+	if (bits >= 10 && driver->queryTextureFormat(video::ECF_A2R10G10B10))
+		return video::ECF_A2R10G10B10;
 	return video::ECF_A8R8G8B8;
 }
 

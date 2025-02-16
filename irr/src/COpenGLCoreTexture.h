@@ -137,6 +137,9 @@ public:
 			Images.clear();
 		}
 
+		if (!name.empty())
+			Driver->irrGlObjectLabel(GL_TEXTURE, TextureName, name.c_str());
+
 		Driver->getCacheHandler()->getTextureCache().set(0, prevTexture);
 
 		TEST_GL_ERROR(Driver);
@@ -169,6 +172,17 @@ public:
 			os::Printer::log("COpenGLCoreTexture: Color format is not supported", ColorFormatNames[ColorFormat < ECF_UNKNOWN ? ColorFormat : ECF_UNKNOWN], ELL_ERROR);
 			return;
 		}
+
+#ifndef IRR_COMPILE_GL_COMMON
+		// On GLES 3.0 we must use sized internal formats for textures in certain
+		// cases (e.g. with ETT_2D_MS). However ECF_A8R8G8B8 is mapped to GL_BGRA
+		// (an unsized format).
+		// Since we don't upload to RTT we can safely pick a different combo that works.
+		if (InternalFormat == GL_BGRA && Driver->Version.Major >= 3) {
+			InternalFormat = GL_RGBA8;
+			PixelFormat = GL_RGBA;
+		}
+#endif
 
 #ifdef _DEBUG
 		char lbuf[100];
@@ -218,7 +232,7 @@ public:
 #endif
 			GLint max_samples = 0;
 			GL.GetIntegerv(GL_MAX_SAMPLES, &max_samples);
-			MSAA = std::min(MSAA, (u8)max_samples);
+			MSAA = core::min_(MSAA, (u8)max_samples);
 
 			if (use_gl_impl)
 				GL.TexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MSAA, InternalFormat, Size.Width, Size.Height, GL_TRUE);
@@ -235,6 +249,9 @@ public:
 			GL.TexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, InternalFormat, Size.Width, Size.Height, 0, PixelFormat, PixelType, 0);
 			break;
 		}
+
+		if (!name.empty())
+			Driver->irrGlObjectLabel(GL_TEXTURE, TextureName, name.c_str());
 
 		Driver->getCacheHandler()->getTextureCache().set(0, prevTexture);
 		if (TEST_GL_ERROR(Driver)) {
