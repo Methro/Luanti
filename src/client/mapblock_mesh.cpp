@@ -76,6 +76,7 @@ void MeshMakeData::fillSingleNode(MapNode data, MapNode padding)
 		
 		m_vmanip.setNodeNoEmerge({0, 0, 0}, data);
 	}
+}
 
 void MeshMakeData::setSmoothLighting(bool smooth_lighting)
 {
