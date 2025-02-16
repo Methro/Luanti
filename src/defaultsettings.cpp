@@ -269,10 +269,7 @@ void set_default_settings()
 	settings->setDefault("cinematic", "false");
 	settings->setDefault("camera_smoothing", "0.36");
 	settings->setDefault("cinematic_camera_smoothing", "0.7");
-<<<<<<< HEAD
 	settings->setDefault("enable_clouds", "false");
-=======
->>>>>>> upstream/master
 	settings->setDefault("view_bobbing_amount", "1.0");
 	settings->setDefault("fall_bobbing_amount", "0.03");
 	settings->setDefault("disable_view_bobbing", "false");
