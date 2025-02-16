@@ -71,6 +71,11 @@ struct MeshMakeData
 		Set the (node) position of a crack
 	*/
 	void setCrack(int crack_level, v3s16 crack_pos);
+	
+	/*
+		Enable or disable smooth lighting
+	*/
+	void setSmoothLighting(bool smooth_lighting);
 };
 
 // represents a triangle as indexes into the vertex buffer in SMeshBuffer
