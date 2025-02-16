@@ -865,9 +865,6 @@ void GenericCAO::updateLight(u32 day_night_ratio)
 	// based on the entity glow.
 	light = encode_light(light_at_pos, m_prop.glow);
 
-	if (g_settings->getBool("fullbright"))
-		light = video::SColor(0xFFFFFFFF);
-
 	if (light != m_last_light) {
 		m_last_light = light;
 		setNodeLight(light);

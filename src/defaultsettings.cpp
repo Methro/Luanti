@@ -299,6 +299,11 @@ void set_default_settings()
 	settings->setDefault("ambient_occlusion_gamma", "1.8");
 	settings->setDefault("enable_particles", "true");
 	settings->setDefault("norender_particles","true");
+	settings->setDefault("enable_shaders", "false");
+	settings->setDefault("enable_particles", "false");
+	settings->setDefault("arm_inertia", "false");
+	settings->setDefault("enable_left_hand", "false");
+	settings->setDefault("arm_inertia", "true");
 	settings->setDefault("show_nametag_backgrounds", "true");
 	settings->setDefault("show_block_bounds_radius_near", "4");
 	settings->setDefault("transparency_sorting_group_by_buffers", "true");
@@ -353,13 +358,12 @@ void set_default_settings()
 	settings->setDefault("enable_hotbar_mouse_wheel", "true");
 	settings->setDefault("invert_hotbar_mouse_wheel", "false");
 	settings->setDefault("mouse_sensitivity", "0.2");
-	settings->setDefault("repeat_place_time", "0.25");
+	settings->setDefault("repeat_place_time", "0.16");
 	settings->setDefault("repeat_dig_time", "0.0");
 	settings->setDefault("safe_dig_and_place", "false");
 	settings->setDefault("random_input", "false");
 	settings->setDefault("aux1_descends", "false");
 	settings->setDefault("doubletap_jump", "false");
-	settings->setDefault("fullbright", "true");
 	settings->setDefault("always_fly_fast", "true");
 	settings->setDefault("autojump", bool_to_cstr(has_touch));
 	settings->setDefault("continuous_forward", "false");
@@ -375,11 +379,11 @@ void set_default_settings()
 	settings->setDefault("serverlist_file", "favoriteservers.json");
 
 	// General font settings
-	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Arimo-Regular.ttf"));
+	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "MC.ttf"));
 	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-Italic.ttf"));
 	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Arimo-Bold.ttf"));
 	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-BoldItalic.ttf"));
-	settings->setDefault("font_bold", "true");
+	settings->setDefault("font_bold", "false");
 	settings->setDefault("font_italic", "false");
 	settings->setDefault("font_shadow", "1");
 	settings->setDefault("font_shadow_alpha", "127");
